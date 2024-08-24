@@ -1,0 +1,129 @@
+<section class="section profile">
+ 
+    <div class="container-fluid flex">
+        <div class="cognitive-page flex">
+            <div class="text">
+                <h1 routerLink="/">CASPER</h1>
+                <p class="mt-4">Cognitive Aeronautical Study &<br> Permissible Elevation Repository </p>
+            </div>
+            <form [formGroup]="SignupForm"  novalidate>
+ 
+                <h2>Join Us</h2>
+                <span>It's not long before you embark on this journey!</span>
+                <div>
+                    <div class="input-container mt-4">
+                        <input type="text" placeholder="Enter Your Name" (input)="onNameInput($event)"
+                            formControlName="uname" autocomplete="name" id="uname" required>
+                        <i class="bi bi-person-fill suffix"></i>
+                    </div>
+                    <div *ngIf="SignupForm.get('uname').invalid && (SignupForm.get('uname').dirty || SignupForm.get('uname').touched)"
+                        class="alert alert-danger mt-2">
+                        <div *ngIf="SignupForm.get('uname').errors.required">
+                            Name is <strong>required.</strong>
+                        </div>
+                        <div *ngIf="SignupForm.get('uname').errors.pattern">
+                            Name can only contain <strong>letters</strong> and <strong>spaces</strong>.
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <div class="input-container ">
+                        <input type="email" placeholder="Enter Your Email Id" formControlName="email"
+                            autocomplete="email" id="email" ngModel email="true" required>
+                        <i class="bi bi-envelope-fill suffix"></i>
+                    </div>
+                    <div *ngIf="SignupForm.get('email').invalid && (SignupForm.get('email').dirty || SignupForm.get('email').touched)"
+                        class="alert alert-danger mt-2">
+                        <div *ngIf="SignupForm.get('email').errors.required">
+                            Email is <strong>required.</strong>
+                        </div>
+                        <div *ngIf="SignupForm.get('email').errors.email">
+                            Please enter a valid <strong>Email address</strong>.
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <div class="input-container ">
+                        <!-- <span class="prefix">+91</span> -->
+                        <input type="tel" placeholder="Phone Number" formControlName="phone_number"
+                            (keypress)="onPhoneNumberKeyPress($event)" minlength="10" maxlength="10" autocomplete="tel"
+                            id="phone_number" (change)="onPhoneNumberChange()" required>
+                        <i class="bi bi-telephone-fill suffix"></i>
+                    </div>
+                    <div *ngIf="SignupForm.get('phone_number').invalid && (SignupForm.get('phone_number').dirty || SignupForm.get('phone_number').touched)"
+                        class="alert alert-danger mt-2">
+                        <div *ngIf="SignupForm.get('phone_number').errors.required">
+                            Phone Number is <strong>required.</strong>
+                        </div>
+                        <div *ngIf="SignupForm.get('phone_number').errors.pattern">
+                            Enter a valid <strong>Phone Number</strong>.
+                        </div>
+                    </div>
+                </div>
+                <div *ngIf="otpSent">
+                    <div class="input-container ">
+                        <input type="tel" placeholder="OTP" formControlName="otp" (keypress)="onOtpKeyPress($event)"
+                            autocomplete="one-time-code" id="otp" required maxlength="4" pattern="[0-9]*">
+                        <button type="button" class="btn suffix" (click)="regenerateOtp()">
+                            <i class="bi bi-arrow-repeat suffix"></i>
+                        </button>
+                    </div>
+                    <div *ngIf="SignupForm.get('otp').invalid && (SignupForm.get('otp').dirty || SignupForm.get('otp').touched)"
+                        class="alert alert-danger mt-2">
+                        <div *ngIf="SignupForm.get('otp').errors.required">
+                            OTP is <strong>required</strong>
+                        </div>
+                        <div *ngIf="SignupForm.get('otp').errors.pattern">
+                            Only numeric characters are allowed for OTP
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <div class="input-container ">
+                        <input type="text" placeholder="Enter Your Address" formControlName="address"
+                            autocomplete="address" id="address" required>
+                        <i class="bi bi-house-fill suffix"></i>
+                    </div>
+                    <div *ngIf="SignupForm.get('address').invalid && (SignupForm.get('address').dirty || SignupForm.get('address').touched)"
+                        class="alert alert-danger mt-2">
+                        <div *ngIf="SignupForm.get('address').errors.required">
+                            Address is <strong>required.</strong>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <div class="input-container">
+                        <input type="password" placeholder="Password" [type]="showPassword ? 'text' : 'password'"
+                            id="password" autocomplete="password" formControlName="password"
+                            placeholder="Enter Your Password">
+                        <i class="bi suffix"
+                            [ngClass]="{'bi-eye-slash-fill': !showPassword, 'bi-eye-fill': showPassword}"
+                            (click)="togglePasswordVisibility()"></i>
+                    </div>
+                    <div *ngIf="SignupForm.get('password').invalid && (SignupForm.get('password').dirty || SignupForm.get('password').touched)"
+                        class="alert alert-danger mt-2">
+                        <div *ngIf="SignupForm.get('password').errors.required">
+                            Password is <strong>required.</strong>
+                        </div>
+                        <div *ngIf="SignupForm.get('password').errors.minlength">
+                            Password must be at least <strong>8 characters</strong> long.
+                        </div>
+                        <div *ngIf="SignupForm.get('password').errors.pattern">
+                            Password must contain at least one <strong>letter</strong>, one <strong>number</strong>,
+                            and
+                            one <strong>special character</strong>.
+                        </div>
+                    </div>
+                </div>
+                <div class="link">
+                    <button type="submit" class="btn btn-outline-primary btn-lg" [disabled]="!SignupForm.valid">Join
+                        Us</button>
+                </div>
+                <hr>
+                <div class="text-center">
+                    <span>Already have an account? <a href="#" routerLink="/UsersLogin"><u>Log
+                                In here</u></a></span>
+                </div>
+            </form>
+        </div>
+    </div>

@@ -1,0 +1,123 @@
+.section.profile::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 50%;
+  background: url('/assets/Casper image 3.jpg') no-repeat center center;
+  // background: linear-gradient(to bottom, #4682B4 50%, transparent 50%);
+  background-size: cover;
+  z-index: -1;
+}
+ 
+.container-fluid {
+  text-align: center;
+  padding: 20px;
+  z-index: 2; /* Ensure content is above the background */
+}
+ 
+.plans {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+ 
+.plan {
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  margin: 10px;
+  padding: 20px;
+  width: 300px;
+  transition: transform 0.3s;
+}
+ 
+.plan img {
+  width: 150px;
+  height: auto;
+  border-radius: 8px;
+}
+ 
+.plan h2 {
+  margin-top: 10px;
+}
+ 
+.plan p {
+  font-size: 1.2em;
+  color: #333;
+}
+ 
+.plan ul {
+  list-style: none;
+  padding: 0;
+  text-align: left;
+}
+ 
+.plan ul li {
+  padding: 8px 0;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+ 
+.plan ul li i {
+  margin-right: 10px;
+}
+ 
+ 
+ 
+ 
+.plan:hover {
+  transform: scale(1.05);
+}
+ 
+@media (max-width: 768px) {
+  .plan {
+      width: 45%;
+  }
+  .plan img {
+    width: 110px;
+    height: auto;
+    border-radius: 8px;
+  }
+}
+ 
+@media (max-width: 480px) {
+  .plan {
+      width: 100%;
+  }
+  .plan img {
+    width: 90px;
+    height: auto;
+    border-radius: 8px;
+  }
+}
+ 
+@media (max-width: 344px) {
+  .plan {
+      width: 100%;
+  }
+  .plan img {
+    width: 75px;
+    height: auto;
+    border-radius: 8px;
+  }
+}
+ 
+ 
+.zoom-text {
+  font-size: 2rem;
+  animation: zoomInOut 3s infinite;
+}
+ 
+@keyframes zoomInOut {
+  0%, 100% {
+      transform: scale(1);
+  }
+  50% {
+      transform: scale(1.5);
+  }
+}

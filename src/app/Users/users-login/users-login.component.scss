@@ -1,0 +1,139 @@
+@import url("https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap");
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Roboto", sans-serif;
+}
+.section.profile::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: url('/assets/Casper image 2.jpg') no-repeat center center;
+  background-size: cover;
+  z-index: -1;
+}
+ 
+.flex {
+  display: flex;
+  align-items: center;
+}
+.container-fluid {
+  padding: 0 15px;
+  min-height: 100vh;
+  justify-content: center;
+}
+.cognitive-page {
+  justify-content: space-between;
+  max-width: 1000px;
+  width: 100%;
+}
+.cognitive-page .text {
+  margin-bottom: 90px;
+}
+.cognitive-page h1 {
+  color: whitesmoke;
+  font-size: 4rem;
+  margin-bottom: 1px;
+}
+.cognitive-page p {
+  font-size: 1rem;
+  white-space: nowrap;
+  color: whitesmoke;
+}
+form {
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1), 0 8px 16px rgba(0, 0, 0, 0.1);
+  max-width: 400px;
+  width: 100%;
+}
+form input {
+  height: 55px;
+  width: 100%;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  margin-bottom: 15px;
+  font-size: 1rem;
+  padding: 0 14px;
+}
+form input:focus {
+  outline: none;
+  border-color: #1877f2;
+}
+::placeholder {
+  color: #777;
+  font-size: 1.063rem;
+}
+.link {
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  gap: 15px;
+}
+.link .login {
+  border-radius: 50px ;
+}
+form a {
+  text-decoration: none;
+}
+.link .forgot {
+  color: #1877f2;
+  font-size: 0.875rem;
+}
+.link .forgot:hover {
+  text-decoration: underline;
+}
+hr {
+  border: none;
+  height: 1px;
+  background-color: #ccc;
+  margin-bottom: 20px;
+  margin-top: 20px;
+}
+.input-container {
+  position: relative;
+}
+.input-container input {
+  padding-right: 40px;
+  /* adjust as needed */
+}
+.input-container i,
+.input-container span {
+  position: absolute;
+  right: 10px;
+  /* adjust as needed */
+  top: 50%;
+  transform: translateY(-50%);
+}
+@media (max-width: 900px) {
+  .cognitive-page {
+    flex-direction: column;
+    text-align: center;
+  }
+  .cognitive-page .text {
+    margin-bottom: 30px;
+  }
+}
+input[type="password"]::-ms-reveal
+ {
+    display: none;
+}
+ 
+@media (max-width: 460px) {
+  .cognitive-page h1 {
+    font-size: 3.5rem;
+  }
+  .cognitive-page p {
+    font-size: 1.3rem;
+  }
+  form {
+    padding: 15px;
+  }
+}

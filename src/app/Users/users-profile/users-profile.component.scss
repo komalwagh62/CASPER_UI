@@ -1,0 +1,151 @@
+/* Background Image for Profile Section */
+.section.profile::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 50%;
+  background: url('/assets/Casper image 3.jpg') no-repeat center center;
+  background-size: cover;
+  z-index: -1;
+}
+
+/* Profile Card */
+.card {
+  margin-top: 250px;
+}
+
+.profile-card {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  border: none;
+  border-radius: 5px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  background-color: white;
+  padding: 20px;
+  height: 270px;
+  margin-top: 250px;
+}
+
+.profile-card .hoverable {
+  display: block;
+  cursor: pointer;
+  position: relative;
+}
+
+.profile-card img {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  margin-bottom: 20px;
+}
+
+/* Nav Tabs */
+.nav-tabs {
+  margin-bottom: 20px;
+}
+
+.nav-tabs .nav-item {
+  margin-bottom: -1px;
+}
+
+.nav-tabs .nav-link {
+  border: 1px solid transparent;
+  border-top-left-radius: .25rem;
+  border-top-right-radius: .25rem;
+}
+
+.nav-tabs .nav-link.active {
+  color: #495057;
+  background-color: #fff;
+  border-color: #dee2e6 #dee2e6 #fff;
+}
+
+.card-title {
+  margin-bottom: 15px;
+}
+
+.label {
+  font-weight: bold;
+}
+
+.row {
+  margin-bottom: 10px;
+}
+
+input.form-control, .form-check-input {
+  border-radius: .25rem;
+}
+
+button.btn {
+  border-radius: .25rem;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.mt-3 {
+  margin-top: 1rem;
+}
+
+/* Responsive Styles */
+@media (max-width: 992px) {
+  .card {
+    margin-top: 200px;
+  }
+
+  .profile-card {
+    margin-top: 100px;
+    height: auto;
+  }
+}
+
+@media (max-width: 768px) {
+  .card {
+    margin-top: 150px;
+  }
+
+  .profile-card {
+    margin-top: 50px;
+    padding: 15px;
+    height: auto;
+  }
+
+  .profile-card img {
+    width: 120px;
+    height: 120px;
+  }
+
+  .nav-tabs {
+    flex-wrap: wrap;
+  }
+
+  .nav-item {
+    width: 100%;
+    text-align: center;
+    margin-bottom: 10px;
+  }
+
+  .nav-link {
+    width: 100%;
+    border-radius: .25rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .card {
+    margin-top: 100px;
+  }
+
+  .profile-card {
+    padding: 10px;
+  }
+
+  .profile-card img {
+    width: 100px;
+    height: 100px;
+  }
+}

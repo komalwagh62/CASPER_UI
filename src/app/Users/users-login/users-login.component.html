@@ -1,0 +1,53 @@
+<section class="section profile">
+    <div class="container-fluid flex">
+        <div class="cognitive-page flex">
+            <div class="text">
+                <h1 routerLink="/">CASPER</h1>
+                <p class="mt-4">Cognitive Aeronautical Study &<br> Permissible Elevation Repository </p>
+            </div>
+            <form [formGroup]="LogInForm" (ngSubmit)="login()" novalidate>
+                <h2>Log In</h2>
+                <span>It's not long before you embark on this journey! </span>
+                <div>
+                    <div class="input-container mt-4">
+                        <input type="email" placeholder="Email" formControlName="email" autocomplete="email" id="email"
+                            required>
+                        <i class="bi bi-envelope-at-fill"></i>
+                    </div>
+                    <div *ngIf="LogInForm.get('email').invalid && (LogInForm.get('email').dirty || LogInForm.get('email').touched)"
+                        class="alert alert-danger mt-2">
+                        <div *ngIf="LogInForm.get('email').errors.required">
+                            Email is <strong>required.</strong>
+                        </div>
+                        <div *ngIf="LogInForm.get('email').errors.email">
+                            Please enter a valid <strong>Email address</strong>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <div class="input-container">
+                        <input type="password" placeholder="Password" [type]="showPassword ? 'text' : 'password'"
+                            id="password" autocomplete="password" formControlName="password"
+                            placeholder="8+ (a, A, 1, #)">
+                        <i class="bi" [ngClass]="{'bi-eye-slash-fill': !showPassword, 'bi-eye-fill': showPassword}"
+                            (click)="togglePasswordVisibility()"></i>
+                    </div>
+                    <div *ngIf="LogInForm.get('password').invalid && (LogInForm.get('password').dirty || LogInForm.get('password').touched)"
+                        class="alert alert-danger mt-2">
+                        <div *ngIf="LogInForm.get('password').errors.required">
+                            Password is <strong>required.</strong>
+                        </div>
+                    </div>
+                </div>
+                <div class="link">
+                    <button type="submit" class="btn btn-outline-primary btn-lg">Login</button>
+                    <a href="#" class="forgot" routerLink="/forgot-pass">Forgot password?</a>
+                </div>
+                <hr>
+                <div class="text-center">
+                    <span>Don't have an account? <a href="" routerLink="/UsersRegister"><u>Signup here</u></a></span>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>

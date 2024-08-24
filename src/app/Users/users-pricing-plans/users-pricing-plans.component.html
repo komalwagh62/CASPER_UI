@@ -1,0 +1,68 @@
+<section class="section profile">
+  <div class="container-fluid">
+    <div class="plans">
+      <!-- <div class="plan">
+        <img src="assets/free.png" alt="Free Plan">
+        <h2>Free</h2>
+        <p>₹ 0 / Month</p>
+        <ul class="text-center">
+          <li><i class="bi bi-x" style="font-size: 30px; color: red;"></i>30 days</li>
+          <li><i class="bi bi-check2" style="font-size: 30px; color: blue;"></i> 3 Free Requests</li>
+          <li><i class="bi bi-x" style="font-size: 30px; color: red;"></i> +1 Hr free consultation monthly</li>
+        </ul>
+        <div class="d-grid ">
+ 
+          <button type="button" class="btn btn-outline-primary" (click)="freetrial()">Free trial</button>
+ 
+        </div>
+      </div> -->
+      <div class="plan">
+        <img src="assets/icon/5.png"  alt="NOC application form for No Objection Certificate from Airport Authority of India (AAI).">
+        <h2>Basic</h2>
+        <p class="zoom-text" style="font-size: 10px; color: red;">3 Free Requests*</p>
+        <p>₹ 100 / Month</p>
+        <ul class="text-center">
+          <li><i class="bi bi-check2" style="font-size: 30px; color: red;" style="font-size: 30px; color: blue;"></i> 30
+            days</li>
+          <li><i class="bi bi-check2" style="font-size: 30px; color: blue;"></i> Unlimited Request</li>
+          <li><i class="bi bi-x" style="font-size: 30px; color: red;"></i> +1 Hr free consultation monthly</li>
+        </ul>
+        <div class="d-grid ">
+          <button type="button" class="btn btn-outline-primary" (click)="handlePayment('Basic', 100)">Buy Now</button>
+        </div>
+      </div>
+      <div class="plan">
+        <img src="assets/icon/6.png" alt="NOC application form for No Objection Certificate from Airport Authority of India (AAI).">
+        <h2>Standard</h2>
+        <p style="margin-top: 19%;">₹ 300 / Month</p>
+        <ul class="text-center">
+          <li><i class="bi bi-check2" style="font-size: 30px; color: blue;"></i> 6 Months</li>
+          <li><i class="bi bi-check2" style="font-size: 30px; color: blue;"></i> Unlimited Request</li>
+          <li><i class="bi bi-x" style="font-size: 30px; color: red;"></i> +1 Hr free consultation monthly</li>
+        </ul>
+        <div class="d-grid ">
+          <button type="button" class="btn btn-outline-primary" (click)="handlePayment('Standard', 300)">Buy
+            Now</button>
+        </div>
+      </div>
+      <div class="plan">
+        <img src="assets/icon/7.png" alt="NOC application form for No Objection Certificate from Airport Authority of India (AAI).">
+        <h2>Premium</h2>
+        <p style="margin-top: 19%;">₹ 500 / Month</p>
+        <ul class="text-center">
+          <li><i class="bi bi-check2" style="font-size: 30px; color: blue;"></i> 1 year</li>
+          <li><i class="bi bi-check2" style="font-size: 30px; color: blue;"></i> Unlimited Request</li>
+          <li><i class="bi bi-check2" style="font-size: 30px; color: blue;"></i> +1 Hr free consultation monthly</li>
+        </ul>
+        <div class="d-grid ">
+          <button type="button" class="btn btn-outline-primary" (click)="handlePayment('Advance', 500)">Buy Now</button>
+        </div>
+      </div>
+      <div *ngIf="transactionId">
+        <p>Payment was successful. If you want to see payment details, please <a
+            [href]="'/subscription-details/' + transactionId">click here</a>.</p>
+      </div>
+    </div>
+  </div>
+</section>
+ 

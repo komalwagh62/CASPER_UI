@@ -1,0 +1,66 @@
+<section class="d-flex justify-content-center align-items-center background">
+    <div class="container d-flex justify-content-center align-items-center">
+        <div class="row justify-content-center ">
+            <div class="col">
+                <div class="card" style="width: 25rem;">
+                    <div class="card-header">
+                        <h1>Select a Service</h1>
+                        <p>It's not long before you embark on this journey!</p>
+                    </div>
+ 
+                    <div class="card-body">
+                        <div class="input-group mb-3">
+                            <span class="input-group-text" id="basic-addon1"> <i class="bi bi-person-circle"></i></span>
+                            <input type="text" class="form-control" placeholder="Username" aria-label="Username"
+                                aria-describedby="basic-addon1" value="{{ user.uname }}" readonly>
+                        </div>
+                        <div class="input-group mb-3">
+                            <span class="input-group-text" id="basic-addon1"> <i
+                                    class="bi bi-envelope-at-fill"></i></span>
+                            <input type="email" class="form-control" placeholder="email" aria-label="email"
+                                aria-describedby="basic-addon1" value="{{ user.email }}" readonly>
+                        </div>
+                        <form [formGroup]="requestForm" (ngSubmit)="createRequest()">
+                            <div class="input-box">
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="aeronauticalStudy" name="service4"
+                                        value="Aeronautical Study / Shielding Benefits Study"
+                                        formControlName="service4">
+                                    <label for="aeronauticalStudy" class="checkbox-label">Aeronautical Study / Shielding
+                                        Benefits Study</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="preAeronauticalStudy" name="service3"
+                                        value="Pre-aeronautical Study" formControlName="service3">
+                                    <label for="preAeronauticalStudy" class="checkbox-label">Pre-aeronautical
+                                        Study</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="nocApplication" name="service2"
+                                        value="NOC Application & Associated Service" formControlName="service2">
+                                    <label for="nocApplication" class="checkbox-label">NOC Application & Associated
+                                        Service</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="WGSSurvey" name="service1" value="WGS-84 Survey"
+                                        formControlName="service1">
+                                    <label for="WGSSurvey" class="checkbox-label">WGS-84 Survey</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="documentsManagement" name="service5"
+                                        value="Documents & Process Management" formControlName="service5">
+                                    <label for="documentsManagement" class="checkbox-label">Documents & Process
+                                        Management</label>
+                                </div>
+                            </div>
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-outline-primary rounded-5 py-2 px-4"
+                                    type="submit">Submit</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

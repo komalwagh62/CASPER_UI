@@ -1,0 +1,216 @@
+<section>
+  <div class="container-fluid">
+    <div class="row mt-4">
+      <div class="col-xxl-4 col-lg-4 col-md-6 mb-4">
+        <div class="card ">
+          <div class="text-end">
+            <img src="assets/arrow.png" (click)="detailsOfPermissible()" style="height: 63px; width: 63px">
+            <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow"></ul>
+          </div>
+          <div class="card-body">
+            <h3 class="card-title">User Request</h3>
+            <div class="d-flex align-items-center">
+              <div class="d-flex align-items-center justify-content-center">
+                <i class="bi bi-building-fill-gear"
+                  alt="Construction project near airport needing No Objection Certificate"
+                  style="font-size: 60px; color:#004aad;"></i>
+                <!-- <img src="assets/construction.png" alt="Aeronautical study services for NOC from airport authority" class="construction-img" style="height: 63px; width: 63px"> -->
+              </div>
+              <div class="ps-3">
+                <h1>{{permissibleRowCount}}</h1>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-xxl-4 col-lg-4 col-md-6 mb-4">
+        <div class="card">
+          <div class="text-end">
+            <img src="assets/arrow.png" (click)="detailsOfSubscription()" style="height: 63px; width: 63px">
+            <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow"></ul>
+          </div>
+          <div class="card-body">
+            <h3 class="card-title">User Subscription</h3>
+            <div class="d-flex align-items-center">
+              <div class="d-flex align-items-center justify-content-center">
+                <!-- <img src="assets/membership.png" alt="Construction project near airport needing No Objection Certificate" class="member-img" style="height: 63px; width: 63px"> -->
+                <i alt="Aeronautical study services for NOC from airport authority"
+                  class="bi bi-person-fill-gear construction-img" style="font-size: 60px; color:#004aad;"></i>
+ 
+              </div>
+              <div class="ps-3">
+                <h1>₹ {{ totalSubscriptionPrice }}</h1>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-xxl-4 col-lg-4 col-md-6 mb-4">
+        <div class="card">
+          <div class="text-end">
+            <img src="assets/arrow.png" (click)="detailsOfServices()" style="height: 63px; width: 63px">
+            <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow"></ul>
+          </div>
+          <div class="card-body">
+            <h3 class="card-title">Service Request</h3>
+            <div class="d-flex align-items-center">
+              <div class="d-flex align-items-center justify-content-center">
+                <!-- <img src="assets/request.png" alt="Construction project near airport needing No Objection Certificate" class="request-img" style="height: 63px; width: 63px"> -->
+                <i class="bi bi-layers-half" alt="Construction project near airport needing No Objection Certificate"
+                  style="font-size: 60px; color:#004aad;"></i>
+              </div>
+              <div class="ps-3">
+                <h1>{{serviceRowCount}}</h1>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<section>
+  <div class="container-fluid">
+ 
+    <mat-form-field *ngIf="showPermissibleDetails">
+      <mat-label>Filter User Request</mat-label>
+      <input matInput (keyup)="applyPermissibleFilter($event)" placeholder="Ex. city" #permissibleInput>
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+ 
+    <div *ngIf="showPermissibleDetails">
+      <mat-table [dataSource]="permissibleDataSource" matSort class="mat-elevation-z8" multiTemplateDataRows>
+        <ng-container matColumnDef="city">
+          <mat-header-cell *matHeaderCellDef mat-sort-header> City </mat-header-cell>
+          <mat-cell *matCellDef="let element"> {{element.city}} </mat-cell>
+        </ng-container>
+        <ng-container matColumnDef="airport_name">
+          <mat-header-cell *matHeaderCellDef mat-sort-header> Airport Name </mat-header-cell>
+          <mat-cell *matCellDef="let element"> {{element.airport_name}} </mat-cell>
+        </ng-container>
+        <ng-container matColumnDef="expand">
+          <mat-header-cell *matHeaderCellDef mat-sort-header> </mat-header-cell>
+          <mat-cell *matCellDef="let element">
+            <button mat-icon-button (click)="toggleRow(element)">
+              <mat-icon>{{ expandedElement === element ? 'expand_less' : 'expand_more' }}</mat-icon>
+            </button>
+          </mat-cell>
+        </ng-container>
+        <ng-container matColumnDef="download">
+          <mat-header-cell *matHeaderCellDef> Download </mat-header-cell>
+          <mat-cell *matCellDef="let element">
+            <button mat-icon-button color="primary" (click)="downloadPDF(element)">
+              <mat-icon>cloud_download</mat-icon>
+            </button>
+          </mat-cell>
+        </ng-container>
+ 
+        <mat-header-row *matHeaderRowDef="permissibleDisplayedColumns"></mat-header-row>
+        <mat-row *matRowDef="let row; columns: permissibleDisplayedColumns;"
+          [class.expanded-row]="expandedElement === row"></mat-row>
+ 
+        <ng-container matColumnDef="expandedDetail">
+          <mat-cell *matCellDef="let element" [attr.colspan]="permissibleDisplayedColumns.length">
+            <div *ngIf="expandedElement === element">
+              <div><strong>Name:</strong> {{ this.apiservice.userData.uname }}</div>
+              <div><strong>Site Latitude:</strong> {{element.latitude}}</div>
+              <div><strong>Site Longitude:</strong> {{element.longitude}}</div>
+              <div><strong>Site Elevation:</strong> {{element.site_elevation}}M</div>
+              <div><strong>Distance From ARP:</strong> {{element.distance}}Km</div>
+              <div><strong>Permissible Height (AGL):</strong> {{element.permissible_height}}M</div>
+              <div><strong>Permissible Elevation (AMSL):</strong> {{element.permissible_elevation}}</div>
+            </div>
+          </mat-cell>
+        </ng-container>
+        <mat-row *matRowDef="let row; columns: ['expandedDetail'];" class="expanded-row"
+          [style.display]="expandedElement === row ? 'table-row' : 'none'"></mat-row>
+      </mat-table>
+      <mat-paginator #permissiblePaginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
+    </div>
+  </div>
+ 
+ 
+  <mat-form-field *ngIf="showSubscriptionDetails">
+    <mat-label>Filter User Subscription</mat-label>
+    <input matInput (keyup)="applySubscriptionFilter($event)" placeholder="Ex. type" #subscriptionInput>
+    <mat-icon matSuffix>search</mat-icon>
+  </mat-form-field>
+ 
+  <div class="mat-elevation-z8" *ngIf="showSubscriptionDetails">
+    <mat-table [dataSource]="subscriptionDataSource" multiTemplateDataRows matSort>
+ 
+      <ng-container matColumnDef="subscription_id">
+        <mat-header-cell *matHeaderCellDef mat-sort-header> Subscription ID </mat-header-cell>
+        <mat-cell *matCellDef="let element"> {{element.subscription_id}} </mat-cell>
+      </ng-container>
+ 
+      <ng-container matColumnDef="subscription_status">
+        <mat-header-cell *matHeaderCellDef mat-sort-header> Status </mat-header-cell>
+        <mat-cell *matCellDef="let element" [ngClass]="{
+          'status-active': element.subscription_status === 'Active',
+          'status-inactive': element.subscription_status === 'Inactive',
+          'status-expired': element.subscription_status === 'Expired'
+        }">
+          {{element.subscription_status}}
+        </mat-cell>
+      </ng-container>
+ 
+      <ng-container matColumnDef="createdAt">
+        <mat-header-cell *matHeaderCellDef mat-sort-header> Active Date </mat-header-cell>
+        <mat-cell *matCellDef="let element"> {{element.createdAt}} </mat-cell>
+      </ng-container>
+ 
+      <ng-container matColumnDef="expiry_date">
+        <mat-header-cell *matHeaderCellDef mat-sort-header> Expiry Date </mat-header-cell>
+        <mat-cell *matCellDef="let element"> {{element.expiry_date}} </mat-cell>
+      </ng-container>
+ 
+      <ng-container matColumnDef="price">
+        <mat-header-cell *matHeaderCellDef mat-sort-header> Price </mat-header-cell>
+        <mat-cell *matCellDef="let element"> {{element.price}} </mat-cell>
+      </ng-container>
+ 
+      <ng-container matColumnDef="subscription_type">
+        <mat-header-cell *matHeaderCellDef mat-sort-header> Type </mat-header-cell>
+        <mat-cell *matCellDef="let element"> {{element.subscription_type}} </mat-cell>
+      </ng-container>
+ 
+      <mat-header-row
+        *matHeaderRowDef="['subscription_id', 'subscription_status','createdAt','expiry_date','price', 'subscription_type']"></mat-header-row>
+      <mat-row
+        *matRowDef="let row; columns: ['subscription_id', 'subscription_status','createdAt','expiry_date','price', 'subscription_type'];"></mat-row>
+    </mat-table>
+    <mat-paginator #subscriptionPaginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
+  </div>
+ 
+  <mat-form-field *ngIf="showServiceDetails">
+    <mat-label>Filter User Service</mat-label>
+    <input matInput (keyup)="applyServiceFilter($event)" placeholder="Ex. Service NAme" #serviceInput>
+    <mat-icon matSuffix>search</mat-icon>
+  </mat-form-field>
+  <div class="mat-elevation-z8" *ngIf="showServiceDetails">
+ 
+    <mat-table [dataSource]="serviceDataSource" matSort>
+      <ng-container matColumnDef="serviceNames">
+        <mat-header-cell *matHeaderCellDef mat-sort-header> Service Names </mat-header-cell>
+        <mat-cell *matCellDef="let element">
+          <ul>
+            <!-- Display service names where the value is true -->
+            <li *ngFor="let serviceName of getActiveServiceNames(element.services)">
+              {{ serviceName }}
+            </li>
+          </ul>
+        </mat-cell>
+      </ng-container>
+ 
+      <mat-header-row *matHeaderRowDef="['serviceNames']"></mat-header-row>
+      <mat-row *matRowDef="let row; columns: ['serviceNames']"></mat-row>
+    </mat-table>
+    <div *ngIf="filterserviceDetails.length === 0" class="alert alert-warning" role="alert">
+      No services found.
+    </div>
+    <mat-paginator #servicePaginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
+ 
+  </div>
+ 
+</section>

@@ -1,0 +1,42 @@
+/* Footer Styles */
+.fixed-footer {
+  // position: fixed;
+  bottom: 0;
+  width: 100%;
+ 
+
+  // z-index: 1000;
+}
+
+.footer-bottom {
+  padding: 20px 0;
+  text-align: center;
+  margin-top: 20px;
+}
+
+
+
+.footer-links a {
+  margin: 0 20px; /* Increased margin to add more space */
+
+  text-decoration: none;
+}
+
+.footer-links a:hover {
+  color: #3b5998;
+}
+
+/* Responsive Styles */
+@media (max-width: 767px) {
+  .footer-bottom {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .footer-links {
+    margin-top: 10px;
+  }
+
+
+}

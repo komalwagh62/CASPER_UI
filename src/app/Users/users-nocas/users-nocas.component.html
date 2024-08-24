@@ -1,0 +1,270 @@
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-lg-2">
+      <form [formGroup]="TopElevationForm" autocomplete="on" novalidate>
+        <div class="mb-2">
+          <label class="form-label">Select Site Location</label>
+          <div class="form-check">
+            <input class="form-check-input" type="radio" formControlName="location" value="currentLocation"
+              id="currentLocation" (click)="getLocation()">
+            <label class="form-check-label" for="currentLocation">
+              Use current location
+            </label>
+
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="radio" formControlName="location" value="manual" id="manual">
+            <label class="form-check-label" for="manual">
+              Enter Site Coordinates
+            </label>
+          </div>
+        </div>
+
+        <div *ngIf="TopElevationForm.get('location')?.value === 'manual'">
+          <div class="mb-3">
+            <label for="Site_latitude" class="form-label">Site Latitude</label>
+            <div class="input-group">
+              <input type="text" class="form-control" [value]="latitudeDMS" name="Latitude" formControlName="Latitude"
+                id="Latitude" placeholder="19°4'29.28 N">
+              <span class="input-group-text">
+                <i class="bi bi-geo-alt-fill"></i>
+              </span>
+              <div
+                *ngIf="TopElevationForm.get('Latitude').invalid && (TopElevationForm.get('Latitude').dirty || TopElevationForm.get('Latitude').touched)"
+                class="alert alert-danger mt-2">
+                <div *ngIf="TopElevationForm.get('Latitude').errors.required">
+                  Latitude is <strong>required.</strong>
+                </div>
+                <div *ngIf="TopElevationForm.get('Latitude').errors.pattern">
+                  Latitude can DMS Format Only ex:<strong>19°4'29.28"N</strong>.
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label for="Site_longitude" class="form-label">Site Longitude</label>
+            <div class="input-group">
+              <input type="text" class="form-control" [value]="longitudeDMS" name="Longitude"
+                formControlName="Longitude" id="Longitude" placeholder="72°53'8.16 E">
+              <span class="input-group-text">
+                <i class="bi bi-geo-alt-fill"></i>
+              </span>
+              <div
+                *ngIf="TopElevationForm.get('Longitude').invalid && (TopElevationForm.get('Longitude').dirty || TopElevationForm.get('Longitude').touched)"
+                class="alert alert-danger mt-2">
+                <div *ngIf="TopElevationForm.get('Longitude').errors.required">
+                  Longitude is <strong>required.</strong>
+                </div>
+                <div *ngIf="TopElevationForm.get('Longitude').errors.pattern">
+                  Longitude can DMS Format Only ex:<strong>72°53'8.16"E</strong>.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="mb-2">
+          <label class="form-label">Select Nearest Airport</label>
+          <div class="form-check">
+            <input class="form-check-input" type="radio" formControlName="selectionMode" value="default" id="autoSelect"
+              (click)="updateNearestAirportData()">
+            <label class="form-check-label" for="autoSelect">
+              Auto Select Airport
+            </label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="radio" formControlName="selectionMode" value="manual"
+              id="manualSelect">
+            <label class="form-check-label" for="manualSelect">
+              Enter nearest Airport
+            </label>
+          </div>
+        </div>
+        <div *ngIf="TopElevationForm.get('selectionMode')?.value === 'manual'">
+          <div class="mb-2">
+            <label for="airportCITY" class="form-label">City</label>
+            <div class="input-group">
+              <select class="form-select" id="airportCITY" formControlName="CITY">
+                <option value="" disabled>Select a City</option>
+                <option *ngFor="let airport of airports" [value]="airport.airport_city">{{ airport.airport_city }}
+                </option>
+              </select>
+              <span class="input-group-text">
+                <i class="bi bi-buildings-fill"></i>
+              </span>
+            </div>
+          </div>
+          <div class="mb-2">
+            <label for="airportName" class="form-label">Airport Name</label>
+            <div class="input-group">
+              <input type="text" id="airportName" class="form-control" [value]="selectedAirportName"
+                placeholder="Airport Name" readonly>
+              <span class="input-group-text">
+                <i class="bi bi-airplane-fill"></i>
+              </span>
+            </div>
+          </div>
+        </div>
+        <div class="mb-2">
+          <label class="form-label">Select Site Elevation (meter)</label>
+          <div class="form-check">
+            <input class="form-check-input" type="radio" formControlName="elevationOption" value="unknown"
+              id="autoSelectElevation" (change)="onElevationOptionChange()">
+            <label class="form-check-label" for="autoSelectElevation">
+              Auto-Select (Default Airport Elevation)
+            </label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="radio" formControlName="elevationOption" value="known"
+              id="manualSelectElevation">
+            <label class="form-check-label" for="manualSelectElevation">
+              Enter Site Elevation
+            </label>
+          </div>
+        </div>
+        <div *ngIf="TopElevationForm.get('elevationOption')?.value === 'known'">
+          <div class="mb-3">
+            <label for="Site_Elevation" class="form-label">Site Elevation</label>
+            <div class="input-group">
+              <input type="number" class="form-control" formControlName="Site_Elevation" id="Site_Elevation"
+                placeholder="Site Elevation">
+              <span class="input-group-text">
+                <i class="bi bi-pencil-square"></i>
+              </span>
+            </div>
+          </div>
+        </div>
+        <div class="btn-toolbar justify-content-between">
+          <button type="submit" class="btn btn-outline-primary rounded-5 py-2 px-4" (click)="submitForm()">Submit</button>
+          <button type="reset" class="btn btn-outline-danger rounded-5 py-2 px-4" (click)="resetForm()">Reset</button>
+        </div>
+      </form>
+    </div>
+    <div class="col-lg-10">
+      <div class="map-container">
+        <div id="map" style="height: 100vh; width: 100%;"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="airportModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header  flex-column align-items-center position-relative">
+        <img src="assets/icon/CASPER_LOGO.png" alt="Company Logo" class="company-logo ">
+        <h2 class="modal-title ">Your site location is near the following airports. Please select closest airport:</h2>
+      </div>
+      <div class="modal-body">
+        <div id="airportList">
+          <div *ngFor="let airport of closestAirportList; let i = index">
+            {{ i + 1 }}.
+            <input type="checkbox" class="closest-airport-checkbox" [attr.data-airport-city]="airport.airportCity"
+              [attr.data-airport-name]="airport.airportName" [attr.data-distance]="airport.distance"
+              (change)="updateSelectedAirport(airport.airportCity, airport.airportName, airport.distance)">
+            {{ airport.airportName }}
+            <br>
+          </div>
+        </div>
+        <div class="d-grid gap-2 button-Top">
+          <button type="button" class="btn btn-outline-primary rounded-5" (click)="handleAirportModalOK()">OK</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="insideMapData" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header  flex-column align-items-center position-relative">
+        <img src="assets/icon/CASPER_LOGO.png" alt="Company Logo" class="company-logo">
+        <h2 class="modal-title ">Site Location Details</h2>
+        <button type="button" class="btn-close topright " (click)="closeModal('insideMapData')"
+          aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <table class="table table-hover">
+          <tbody>
+            <tr>
+              <td scope="row"><b>Permissible Elevation (AMSL Above Mean Sea Level)</b></td>
+              <td>{{ isSubscribed ? insideMapData.elevation : '***' }}</td>
+            </tr>
+            <tr>
+              <td scope="row"><b>Permissible Height (AGL - Above Ground Level)</b></td>
+              <td>{{ isSubscribed ? insideMapData.permissibleHeight + 'M' : '***' }}</td>
+            </tr>
+            <tr>
+              <td scope="row"><b>Site Location</b></td>
+              <td colspan="2">Latitude: {{ isSubscribed ? insideMapData.latitudeDMS : '***' }}<br> Longitude: {{
+                isSubscribed ? insideMapData.longitudeDMS : '***' }}
+              </td>
+            </tr>
+            <tr>
+              <td scope="row"><b>Distance (Site Location from ARP)</b></td>
+              <td colspan="2">{{ isSubscribed ? insideMapData.newDistance + ' Km' : '***' }}</td>
+            </tr>
+          </tbody>
+        </table>
+        <div id="SubscribePlans" [style.display]="isSubscribed ? 'none' : 'block'">
+          <h3>To get the complete result, upgrade your account with our subscription plans. If you prefer not to
+            subscribe, you can make a one-time payment to get the result.</h3>
+          <button type="button" class="btn btn-outline-primary rounded-5" (click)="subscribe()">Subscribe</button>
+          <button type="button" class="btn btn-outline-primary rounded-5" (click)="MakePayment()">Make Payment</button>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <p>We wish you success in your project. Our range of services will assist you in WGS-84 Survey, NOC process
+          support, Aeronautical study & Assessment. Please connect for details.</p>
+        <button type="button" class="btn btn-outline-primary rounded-5" routerLink="/request-Service">Check-Out
+          Now</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="outsideMapData" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header  flex-column align-items-center position-relative">
+
+        <img src="assets/icon/CASPER_LOGO.png" alt="Company Logo" class="company-logo">
+        <h2 class="modal-title">Site Location Details</h2>
+        <button type="button" class="btn-close topright" (click)="closeModal('outsideMapData')" data-bs-dismiss="modal"
+          aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div>
+          <b>Site location selected by the user is outside {{ outsideMapData.airport_name }} CCZM boundary published by
+            AAI. Permissible Elevation calculation could not be processed. Please contact us for further
+            details.</b><br><br>
+          <table class="table table-hover">
+            <tbody>
+              <tr>
+                <th scope="row">Site Location</th>
+                <td colspan="2">Latitude: {{ isSubscribed ? outsideMapData.latitudeDMS : '***' }}<br> Longitude: {{
+                  isSubscribed ? outsideMapData.longitudeDMS : '***' }}</td>
+              </tr>
+              <tr>
+                <th scope="row">Distance (Site Location from ARP)</th>
+                <td colspan="2">{{ isSubscribed ? outsideMapData.newDistance + ' Km' : '***' }}</td>
+              </tr>
+            </tbody>
+          </table>
+          <div id="SubscribePlans" [style.display]="isSubscribed ? 'none' : 'block'">
+            <h3>To get the complete result, upgrade your account with our subscription plans. If you prefer not to
+              subscribe, you can make a one-time payment to get the result.</h3>
+            <button type="button" class="btn btn-outline-primary rounded-5" (click)="subscribe()">Subscribe</button>
+            <button type="button" class="btn btn-outline-primary rounded-5" (click)="MakePayment()">Make
+              Payment</button>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <p>We wish you success in your project. Our range of services will assist you in WGS-84 Survey, NOC process
+          support, Aeronautical study & Assessment. Please connect for details.</p>
+        <button type="button" class="btn btn-outline-primary rounded-5" routerLink="/request-Service">Check-Out
+          Now</button>
+      </div>
+    </div>
+  </div>
+</div>

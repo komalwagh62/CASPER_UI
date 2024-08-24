@@ -1742,17 +1742,17 @@ export class UsersNOCASComponent implements OnInit {
         const img = L.DomUtil.create('img');
         img.src = '/assets/CASPER_LOGO.png'; // Replace with your watermark image URL
         img.style.width = '100px';
-        img.style.opacity = '0.5'; // Adjust transparency
+        img.style.opacity = '1'; // Adjust transparency
         img.style.display = 'block';
         return img;
       }
     });
 
     // Add the watermark control to the map
-    new WatermarkControl({ position: 'topright' }).addTo(this.map);
+    new WatermarkControl({ position: 'topleft' }).addTo(this.map);
 
 
-    L.control.layers(baseMaps, overlayMaps, { position: 'topleft' }).addTo(this.map);
+    L.control.layers(baseMaps, overlayMaps, { position: 'topright' }).addTo(this.map);
     streets.addTo(this.map);
     L.control.scale({ position: 'bottomright', metric: false }).addTo(this.map);
     L.control.zoom({ position: 'bottomright' }).addTo(this.map);

@@ -28,10 +28,18 @@
             "index": "src/index.html",
             "browser": "src/main.ts",
             "allowedCommonJsDependencies": [
-              "leaflet"
+              "leaflet",
+              "canvg",
+              "rgbcolor",
+              "raf",
+              "jspdf-autotable",
+              "dom-to-image",
+              "html2canvas",
+              "dompurify"
            ],
             "polyfills": [
-              "zone.js"
+              "zone.js",
+              "@angular/localize/init"
             ],
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",

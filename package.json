@@ -44,8 +44,8 @@
     "zone.js": "~0.14.3"
   },
   "devDependencies": {
-    "@angular-devkit/build-angular": "^18.1.2",
-    "@angular/cli": "^18.1.2",
+    "@angular-devkit/build-angular": "^18.2.1",
+    "@angular/cli": "^18.2.1",
     "@angular/compiler-cli": "^18.1.2",
     "@types/dom-to-image": "^2.6.7",
     "@types/file-saver": "^2.0.7",

@@ -82,23 +82,25 @@ export class UsersRegisterComponent implements OnInit {
     const encodedText = encodeURIComponent(text);
 
     // Construct the API URL
-    // const smsApiUrl = `https://bhashsms.com/api/sendmsg.php?user=${user}&pass=${pass}&sender=${sender}&phone=${phone}&text=${encodedText}&priority=${priority}&stype=${stype}`;
-     const smsApiUrl = `/another-api/sendmsg.php?user=${user}&pass=${pass}&sender=${sender}&phone=${phone}&text=${encodedText}&priority=${priority}&stype=${stype}`;
+    const smsApiUrl = `https://bhashsms.com/api/sendmsg.php?user=${user}&pass=${pass}&sender=${sender}&phone=${phone}&text=${encodedText}&priority=${priority}&stype=${stype}`;
+    //  const smsApiUrl = `/another-api/sendmsg.php?user=${user}&pass=${pass}&sender=${sender}&phone=${phone}&text=${encodedText}&priority=${priority}&stype=${stype}`;
 
-    console.log(smsApiUrl)
+    
     // Send the OTP via the SMS API
     this.http.get(smsApiUrl, { responseType: 'text' }).subscribe(
+      
       (response: any) => {
+       
         this.toastr.success('OTP sent successfully', 'Success');
       },
-      (error: HttpErrorResponse) => {
-        console.error("Error sending OTP:", error);
-        if (error.status === 0) {
-          this.toastr.error('Network error or the server is unreachable. Please try again later.', 'Error');
-        } else {
-          this.toastr.error(`Failed to send OTP: ${error.message}`, 'Error');
-        }
-      }
+      // (error: HttpErrorResponse) => {
+      //   console.error("Error sending OTP:", error);
+      //   if (error.status === 0) {
+      //     this.toastr.error('Network error or the server is unreachable. Please try again later.', 'Error');
+      //   } else {
+      //     this.toastr.error(`Failed to send OTP: ${error.message}`, 'Error');
+      //   }
+      // }
     );
 
   }

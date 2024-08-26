@@ -8,7 +8,7 @@
         "secure": false,
         "changeOrigin": true,
         "pathRewrite": {
-            "^/api": ""
+            "^/another-api": ""
         }
     }
 }

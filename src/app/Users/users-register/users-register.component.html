@@ -6,7 +6,7 @@
                 <h1 routerLink="/">CASPER</h1>
                 <p class="mt-4">Cognitive Aeronautical Study &<br> Permissible Elevation Repository </p>
             </div>
-            <form [formGroup]="SignupForm"  novalidate>
+            <form [formGroup]="SignupForm" (ngSubmit)="createUser()"  novalidate>
  
                 <h2>Join Us</h2>
                 <span>It's not long before you embark on this journey!</span>

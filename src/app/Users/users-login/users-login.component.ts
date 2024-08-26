@@ -22,7 +22,7 @@ export class UsersLoginComponent {
   public showPassword: boolean = false;
   ngOnInit(): void {
     this.LogInForm = this.formbuilder.group({
-      email: new FormControl('', [Validators.required, Validators.email, Validators.nullValidator]),
+      email: ['', [Validators.required, Validators.email, Validators.pattern(/([a-zA-Z0-9]+)([\_\.\-{1}])?([a-zA-Z0-9]+)\@([a-zA-Z0-9]+)([\.])([a-zA-Z\.]+)/g)]],
       password: new FormControl('', [Validators.required, Validators.nullValidator])
     });
   }

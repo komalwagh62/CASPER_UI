@@ -37,7 +37,7 @@
                         <div *ngIf="SignupForm.get('email').errors.required">
                             Email is <strong>required.</strong>
                         </div>
-                        <div *ngIf="SignupForm.get('email').errors.email">
+                        <div *ngIf="SignupForm.get('email').errors.pattern">
                             Please enter a valid <strong>Email address</strong>.
                         </div>
                     </div>
@@ -88,6 +88,9 @@
                         class="alert alert-danger mt-2">
                         <div *ngIf="SignupForm.get('address').errors.required">
                             Address is <strong>required.</strong>
+                        </div>
+                        <div *ngIf="SignupForm.get('address').errors.pattern">
+                            Enter a valid <strong>Address.</strong>
                         </div>
                     </div>
                 </div>

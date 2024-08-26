@@ -5,7 +5,8 @@
         <div class="card profile-card">
           <div class="card-body text-center">
             <label class="hoverable" for="fileInput">
-              <img [src]="imageUrl ? imageUrl : 'https://cdn-icons-png.flaticon.com/512/6596/6596121.png'" alt="Profile" class="rounded-circle">
+              <img [src]="imageUrl ? imageUrl : 'https://cdn-icons-png.flaticon.com/512/6596/6596121.png'" alt="Profile"
+                class="rounded-circle">
               <div class="background"></div>
             </label>
             <h1 class="mt-3">{{this.user.uname}}</h1>
@@ -17,13 +18,15 @@
           <div class="card-body pt-3">
             <ul class="nav nav-tabs nav-tabs-bordered">
               <li class="nav-item">
-                <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#profile-overview">Overview</button>
+                <button class="nav-link active" data-bs-toggle="tab"
+                  data-bs-target="#profile-overview">Overview</button>
               </li>
               <li class="nav-item">
                 <button class="nav-link" data-bs-toggle="tab" data-bs-target="#profile-edit">Edit Profile</button>
               </li>
               <li class="nav-item">
-                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#profile-change-password">Change Password</button>
+                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#profile-change-password">Change
+                  Password</button>
               </li>
             </ul>
             <div class="tab-content pt-2">
@@ -51,19 +54,33 @@
                   <div class="row mb-3">
                     <label for="uname" class="col-md-4 col-lg-3 col-form-label">Name</label>
                     <div class="col-md-8 col-lg-9">
-                      <input name="uname" type="text" class="form-control" id="uname" [(ngModel)]="this.updatedUser.uname">
+                      <input name="uname" type="text" class="form-control" id="uname"
+                        [(ngModel)]="this.updatedUser.uname" pattern="[A-Za-z\s]*" required
+                        title="Name must contain only letters and spaces" (input)="onNameInput($event)">
+                      <div *ngIf="!isNameValid() && updatedUser.uname" class="text-danger">
+                        Name cannot contain numbers.
+                      </div>
                     </div>
                   </div>
+
                   <div class="row mb-3">
                     <label for="address" class="col-md-4 col-lg-3 col-form-label">Address</label>
                     <div class="col-md-8 col-lg-9">
-                      <input name="address" type="text" class="form-control" id="address" [(ngModel)]="this.updatedUser.address" required>
+                      <input name="address" type="text" class="form-control" id="address"
+                        [(ngModel)]="this.updatedUser.address" minlength="15" required
+                        pattern="^(?!\s*$)[a-zA-Z0-9\s,.'-]{15,}$" #address="ngModel"
+                        [ngClass]="{'is-invalid': address.invalid && (address.dirty || address.touched)}">
+                      <div *ngIf="address.invalid && (address.dirty || address.touched)" class="invalid-feedback">
+                        Address must be at least 15 characters long and cannot consist of only spaces.
+                      </div>
                     </div>
                   </div>
+
+
                   <div class="row mb-3">
                     <label for="phone_number" class="col-md-4 col-lg-3 col-form-label">Phone Number</label>
                     <div class="col-md-8 col-lg-9">
-                      <input name="phone_number" type="text" class="form-control readonly-input" id="phone_number"
+                      <input name="phone_number" type="tel" class="form-control readonly-input" id="phone_number"
                         [(ngModel)]="this.updatedUser.phone_number" readonly>
                     </div>
                   </div>
@@ -83,27 +100,51 @@
                 <form (ngSubmit)="changePassword()">
                   <div class="row mb-3">
                     <label for="currentPassword" class="col-md-4 col-lg-3 col-form-label">Current Password</label>
-                    <div class="col-md-8 col-lg-9">
-                      <input name="currentPassword" type="text" class="form-control" [(ngModel)]="currentPassword" id="currentPassword">
+                    <div class="col-md-8 col-lg-9 input-group">
+                      <input name="currentPassword" [type]="showCurrentPassword ? 'text' : 'password'"
+                        class="form-control" [(ngModel)]="currentPassword" id="currentPassword" required>
+                      <button type="button" class="btn btn-outline-secondary"
+                        (click)="togglePasswordVisibility('current')">
+                        <i [class]="showCurrentPassword ? 'bi bi-eye-slash' : 'bi bi-eye'"></i>
+                      </button>
                     </div>
                   </div>
                   <div class="row mb-3">
                     <label for="newPassword" class="col-md-4 col-lg-3 col-form-label">New Password</label>
-                    <div class="col-md-8 col-lg-9">
-                      <input name="newpassword" type="password" class="form-control" required [(ngModel)]="newPassword" id="newPassword">
+                    <div class="col-md-8 col-lg-9 input-group">
+                      <input name="newPassword" [type]="showNewPassword ? 'text' : 'password'" class="form-control"
+                        [(ngModel)]="newPassword" id="newPassword" required>
+                      <button type="button" class="btn btn-outline-secondary" (click)="togglePasswordVisibility('new')">
+                        <i [class]="showNewPassword ? 'bi bi-eye-slash' : 'bi bi-eye'"></i>
+                      </button>
+                      <div *ngIf="!isPasswordValid && newPassword" class="text-danger">
+                        Password must be at least 8 characters long, contain uppercase and lowercase letters, a number,
+                        and a special character.
+                      </div>
                     </div>
                   </div>
                   <div class="row mb-3">
                     <label for="confirmPassword" class="col-md-4 col-lg-3 col-form-label">Re-enter New Password</label>
-                    <div class="col-md-8 col-lg-9">
-                      <input name="confirmPassword" type="text" class="form-control" [(ngModel)]="confirmPassword" (input)="validatePassword()" id="confirmPassword">
+                    <div class="col-md-8 col-lg-9 input-group">
+                      <input name="confirmPassword" [type]="showConfirmPassword ? 'text' : 'password'"
+                        class="form-control" [(ngModel)]="confirmPassword" (input)="validatePassword()"
+                        id="confirmPassword" required>
+                      <button type="button" class="btn btn-outline-secondary"
+                        (click)="togglePasswordVisibility('confirm')">
+                        <i [class]="showConfirmPassword ? 'bi bi-eye-slash' : 'bi bi-eye'"></i>
+                      </button>
+                      <div *ngIf="!passwordsMatch && confirmPassword" class="text-danger">
+                        Passwords do not match.
+                      </div>
                     </div>
                   </div>
                   <div class="text-center">
-                    <button type="submit" [disabled]="!passwordsMatch" class="btn btn-primary">Change Password</button>
+                    <button type="submit" [disabled]="!isPasswordValid || !passwordsMatch"
+                      class="btn btn-primary">Change Password</button>
                   </div>
                 </form>
               </div>
+
             </div>
           </div>
         </div>

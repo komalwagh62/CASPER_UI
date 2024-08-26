@@ -15,11 +15,15 @@ export class UsersProfileComponent implements OnInit {
   newPassword: string = '';
   confirmPassword: string = '';
   passwordsMatch: boolean = false;
+  isPasswordValid: boolean = false;
   imageUrl: string = '';
   imageName: string = '';
   selectedFile: File | undefined;
   airports: any[] = [];
- 
+  showCurrentPassword = false;
+  showNewPassword = false;
+  showConfirmPassword = false;
+
   constructor(
     private route: ActivatedRoute,
     public apiservice: ApiService,
@@ -44,6 +48,16 @@ export class UsersProfileComponent implements OnInit {
   }
  
   saveChanges(): void {
+   
+    if (!this.isNameValid()) {
+      this.toastr.warning('Name cannot contain numbers.');
+      return;
+    }
+    if (this.updatedUser.address.invalid) {
+      this.toastr.warning('Address must be at least 15 characters long.');
+      return;
+    }
+ 
     this.apiservice.updateUserProfile(this.updatedUser).subscribe({
       next: (response) => {
         this.apiservice.parseUserData(response.updatedUser);
@@ -57,7 +71,18 @@ export class UsersProfileComponent implements OnInit {
       }
     });
   }
+  onNameInput(event: any): void {
+    const inputValue = event.target.value;
+    // Remove any non-alphabetic characters except spaces
+    event.target.value = inputValue.replace(/[^A-Za-z\s]/g, '');
+    // Update the model with the cleaned value
+    this.updatedUser.uname = event.target.value;
+  }
  
+  isNameValid(): boolean {
+    const namePattern = /^[A-Za-z\s]*$/;
+    return namePattern.test(this.updatedUser.uname);
+  }
   logout() {
     this.router.navigate(['UserLogin']);
   }
@@ -83,21 +108,37 @@ export class UsersProfileComponent implements OnInit {
     });
   }
  
-  validatePassword() {
+ 
+  validatePassword(): void {
+    const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    this.isPasswordValid = passwordPattern.test(this.newPassword);
     this.passwordsMatch = this.newPassword === this.confirmPassword && !!this.newPassword;
   }
- 
+  togglePasswordVisibility(field: string): void {
+    if (field === 'current') {
+      this.showCurrentPassword = !this.showCurrentPassword;
+    } else if (field === 'new') {
+      this.showNewPassword = !this.showNewPassword;
+    } else if (field === 'confirm') {
+      this.showConfirmPassword = !this.showConfirmPassword;
+    }
+  }
   changePassword(): void {
+    if (!this.isPasswordValid) {
+      this.toastr.warning("New password does not meet the required criteria.");
+      return;
+    }
+
     if (!this.passwordsMatch) {
       this.toastr.warning("Passwords do not match.");
       return;
     }
- 
+
     const passwordData = {
       currentPassword: this.currentPassword,
       newPassword: this.confirmPassword
     };
- 
+
     this.apiservice.changeUserPassword(passwordData).subscribe({
       next: (response) => {
         this.toastr.success(response.message);
@@ -107,4 +148,5 @@ export class UsersProfileComponent implements OnInit {
       }
     });
   }
+
 }

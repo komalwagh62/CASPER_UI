@@ -1195,7 +1195,7 @@ export class UsersNOCASComponent implements OnInit {
       currency: 'INR',
       name: 'Cognitive Navigation Pvt. Ltd',
       description: ` Plan Subscription`,
-      image: 'https://imgur.com/a/J4UAMhv',
+      image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQZ4mHCqV6RQTwJIAON-ZK6QN9rdxF4YK_fLA&s',
       handler: (response: any) => {
         this.router.navigate(['TransactionDetails']);
         const paymentDetails = {
@@ -1206,7 +1206,7 @@ export class UsersNOCASComponent implements OnInit {
           expiry_date: new Date().toISOString(),
         };
         const headers = new HttpHeaders().set("Authorization", `Bearer ${this.apiservice.token}`);
-        this.http.post('http://localhost:3001/api/subscription/addSubscription', paymentDetails, { headers: headers })
+        this.http.post('http://ec2-3-142-142-5.us-east-2.compute.amazonaws.com:3001/api/subscription/addSubscription', paymentDetails, { headers: headers })
           .subscribe(
             (result: any) => {
               this.createNocas(result.subscription_id)

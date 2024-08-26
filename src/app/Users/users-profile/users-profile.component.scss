@@ -10,6 +10,14 @@
   background-size: cover;
   z-index: -1;
 }
+.is-invalid {
+  border-color: #dc3545;
+}
+
+.invalid-feedback {
+  color: #dc3545;
+  font-size: 0.875rem;
+}
 
 /* Profile Card */
 .card {

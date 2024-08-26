@@ -28,14 +28,15 @@ export class UsersRegisterComponent implements OnInit {
 
   ngOnInit(): void {
     this.SignupForm = this.formBuilder.group({
-      email: ['', [Validators.required, Validators.email]],
+      email: ['', [Validators.required, Validators.email, Validators.pattern(/([a-zA-Z0-9]+)([\_\.\-{1}])?([a-zA-Z0-9]+)\@([a-zA-Z0-9]+)([\.])([a-zA-Z\.]+)/g)]],
       phone_number: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(10), Validators.pattern(/^[6789]\d{9}$/)]],
       password: ['', [Validators.required, Validators.minLength(8), Validators.pattern(/^(?=.*[a-zA-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/)]],
       otp: ['', [Validators.required, Validators.pattern('^[0-9]{4}$')]],
       uname: ['', [Validators.required, Validators.pattern(/^[a-zA-Z\s]+$/)]],
-      address: ['', [Validators.required]],
+      address: ['', [Validators.required,Validators.pattern(/^[a-zA-Z0-9\s,.'-]$/)]],
     });
   }
+  
 
   onOtpKeyPress(event: KeyboardEvent) {
     const charCode = event.which ? event.which : event.keyCode;

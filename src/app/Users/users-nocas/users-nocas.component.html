@@ -8,9 +8,9 @@
             <input class="form-check-input" type="radio" formControlName="location" value="currentLocation"
               id="currentLocation" (click)="getLocation()">
             <label class="form-check-label" for="currentLocation">
-              Use current location
+              Use Current Location
             </label>
-
+ 
           </div>
           <div class="form-check">
             <input class="form-check-input" type="radio" formControlName="location" value="manual" id="manual">
@@ -19,46 +19,28 @@
             </label>
           </div>
         </div>
-
+ 
         <div *ngIf="TopElevationForm.get('location')?.value === 'manual'">
           <div class="mb-3">
             <label for="Site_latitude" class="form-label">Site Latitude</label>
             <div class="input-group">
-              <input type="text" class="form-control" [value]="latitudeDMS" name="Latitude" formControlName="Latitude"
+              <input type="dms" class="form-control" [value]="latitudeDMS" name="Latitude" formControlName="Latitude"
                 id="Latitude" placeholder="19°4'29.28 N">
               <span class="input-group-text">
                 <i class="bi bi-geo-alt-fill"></i>
               </span>
-              <div
-                *ngIf="TopElevationForm.get('Latitude').invalid && (TopElevationForm.get('Latitude').dirty || TopElevationForm.get('Latitude').touched)"
-                class="alert alert-danger mt-2">
-                <div *ngIf="TopElevationForm.get('Latitude').errors.required">
-                  Latitude is <strong>required.</strong>
-                </div>
-                <div *ngIf="TopElevationForm.get('Latitude').errors.pattern">
-                  Latitude can DMS Format Only ex:<strong>19°4'29.28"N</strong>.
-                </div>
-              </div>
+             
             </div>
           </div>
           <div class="mb-3">
             <label for="Site_longitude" class="form-label">Site Longitude</label>
             <div class="input-group">
-              <input type="text" class="form-control" [value]="longitudeDMS" name="Longitude"
+              <input type="dms" class="form-control" [value]="longitudeDMS" name="Longitude"
                 formControlName="Longitude" id="Longitude" placeholder="72°53'8.16 E">
               <span class="input-group-text">
                 <i class="bi bi-geo-alt-fill"></i>
               </span>
-              <div
-                *ngIf="TopElevationForm.get('Longitude').invalid && (TopElevationForm.get('Longitude').dirty || TopElevationForm.get('Longitude').touched)"
-                class="alert alert-danger mt-2">
-                <div *ngIf="TopElevationForm.get('Longitude').errors.required">
-                  Longitude is <strong>required.</strong>
-                </div>
-                <div *ngIf="TopElevationForm.get('Longitude').errors.pattern">
-                  Longitude can DMS Format Only ex:<strong>72°53'8.16"E</strong>.
-                </div>
-              </div>
+             
             </div>
           </div>
         </div>
@@ -66,7 +48,7 @@
           <label class="form-label">Select Nearest Airport</label>
           <div class="form-check">
             <input class="form-check-input" type="radio" formControlName="selectionMode" value="default" id="autoSelect"
-              (click)="updateNearestAirportData()">
+              (change)="updateNearestAirportData()">
             <label class="form-check-label" for="autoSelect">
               Auto Select Airport
             </label>
@@ -75,7 +57,7 @@
             <input class="form-check-input" type="radio" formControlName="selectionMode" value="manual"
               id="manualSelect">
             <label class="form-check-label" for="manualSelect">
-              Enter nearest Airport
+              Enter Nearest Airport
             </label>
           </div>
         </div>
@@ -146,7 +128,7 @@
     </div>
   </div>
 </div>
-
+ 
 <div class="modal" id="airportModal" tabindex="-1">
   <div class="modal-dialog">
     <div class="modal-content">
@@ -172,7 +154,7 @@
     </div>
   </div>
 </div>
-
+ 
 <div class="modal" id="insideMapData" tabindex="-1">
   <div class="modal-dialog">
     <div class="modal-content">
@@ -182,7 +164,10 @@
         <button type="button" class="btn-close topright " (click)="closeModal('insideMapData')"
           aria-label="Close"></button>
       </div>
+     
       <div class="modal-body">
+        <h4 style="color: red;">This is not an NOC, information is provided only for reference</h4>
+ 
         <table class="table table-hover">
           <tbody>
             <tr>
@@ -213,26 +198,31 @@
         </div>
       </div>
       <div class="modal-footer">
-        <p>We wish you success in your project. Our range of services will assist you in WGS-84 Survey, NOC process
-          support, Aeronautical study & Assessment. Please connect for details.</p>
+        <p>Our range of services will assist you in WGS-84 Survey, NOC application process support, Aeronautical study & Assessment. Please connect for details. We wish you success in your project. </p>
+          <button type="button" class="btn btn-outline-primary rounded-5" (click)="applyForNOC()">Apply For NOC</button>
+       
         <button type="button" class="btn btn-outline-primary rounded-5" routerLink="/request-Service">Check-Out
           Now</button>
+       
       </div>
     </div>
   </div>
 </div>
-
+ 
 <div class="modal" id="outsideMapData" tabindex="-1">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header  flex-column align-items-center position-relative">
-
+ 
         <img src="assets/icon/CASPER_LOGO.png" alt="Company Logo" class="company-logo">
         <h2 class="modal-title">Site Location Details</h2>
         <button type="button" class="btn-close topright" (click)="closeModal('outsideMapData')" data-bs-dismiss="modal"
           aria-label="Close"></button>
       </div>
+     
       <div class="modal-body">
+        <h4 style="color: red;">This is not an NOC, information is provided only for reference</h4>
+ 
         <div>
           <b>Site location selected by the user is outside {{ outsideMapData.airport_name }} CCZM boundary published by
             AAI. Permissible Elevation calculation could not be processed. Please contact us for further
@@ -260,10 +250,12 @@
         </div>
       </div>
       <div class="modal-footer">
-        <p>We wish you success in your project. Our range of services will assist you in WGS-84 Survey, NOC process
-          support, Aeronautical study & Assessment. Please connect for details.</p>
+        <p>Our range of services will assist you in WGS-84 Survey, NOC application process support, Aeronautical study & Assessment. Please connect for details. We wish you success in your project. </p>
+          <button type="button" class="btn btn-outline-primary rounded-5" (click)="applyForNOC()">Apply For NOC</button>
+       
         <button type="button" class="btn btn-outline-primary rounded-5" routerLink="/request-Service">Check-Out
           Now</button>
+         
       </div>
     </div>
   </div>

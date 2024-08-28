@@ -7,6 +7,8 @@ import { DatePipe } from '@angular/common';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
+import { FormBuilder, FormGroup } from '@angular/forms';
+import { ToastrService } from 'ngx-toastr';
  
  
  
@@ -21,6 +23,7 @@ type ServiceNames = Record<string, string>;
   encapsulation: ViewEncapsulation.None
 })
 export class UsersHomeComponent implements OnInit {
+ 
   subscriptionDataSource = new MatTableDataSource<any>();
   permissibleDataSource = new MatTableDataSource<any>();
   serviceDataSource = new MatTableDataSource<any>();
@@ -36,7 +39,7 @@ export class UsersHomeComponent implements OnInit {
  
   subscriptiondisplayedColumns: string[] = ['subscription_id', 'subscription_status', 'createdAt', 'expiry_date', 'subscription_type', 'price', 'expand'];
   expandedElement: any | null;
-  permissibleDisplayedColumns: string[] = ['city', 'airport_name', 'download', 'expand'];
+  permissibleDisplayedColumns: string[] = ['city', 'airport_name', 'download','Apply NOC', 'expand'];
   subscriptionDetails: any[] = [];
   serviceDetails: any[] = [];
   permissibleDetails: any[] = [];
@@ -64,14 +67,20 @@ export class UsersHomeComponent implements OnInit {
   airport: any;
   request: any;
   sort!: MatSort | null;
- 
-  constructor(private http: HttpClient, public apiservice: ApiService, private datePipe: DatePipe) { }
+  requestForm!: FormGroup;
+  constructor(private toastr: ToastrService,private formBuilder: FormBuilder,private http: HttpClient, public apiservice: ApiService, private datePipe: DatePipe) { }
  
   ngOnInit(): void {
     this.detailsOfServices();
     this.detailsOfSubscription();
     this.detailsOfPermissible();
- 
+    this.requestForm = this.formBuilder.group({
+      service1: [false],
+      service2: [false],
+      service3: [false],
+      service4: [false],
+      service5: [false]
+    });
     // Define custom sorting logic
     this.serviceDataSource.sortingDataAccessor = (item, property) => {
       switch (property) {
@@ -309,4 +318,36 @@ export class UsersHomeComponent implements OnInit {
     const filterValue = (event.target as HTMLInputElement).value.toLowerCase();
     this.permissibleDataSource.filter = filterValue.trim().toLowerCase();
   }
+  applyForNOC() {
+    // Automatically set the service2 checkbox to true
+    this.requestForm.patchValue({
+      service2: true
+    });
+ 
+    // Now, submit the form
+    this.createRequest();
+  }
+ 
+ 
+  createRequest() {
+    if (this.requestForm.valid) {
+      const requestData = {
+        services: JSON.stringify(this.requestForm.value),
+        user_id: this.apiservice.userData.id
+      };
+ 
+      this.apiservice.createRequest(requestData).subscribe(
+        (result: any) => {
+          this.toastr.success("Request created successfully");
+          // Optionally, navigate to another page or perform additional actions here
+        },
+        (error) => {
+          console.error("Error creating request:", error);
+          this.toastr.error("Error creating request");
+        }
+      );
+    } else {
+      this.toastr.warning('Please select a service.');
+    }
+  }  
 }

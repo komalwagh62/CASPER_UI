@@ -1223,13 +1223,12 @@ export class UsersNOCASComponent implements OnInit {
     const absolute = Math.abs(dd);
     const degrees = Math.floor(absolute);
     const minutes = Math.floor((absolute - degrees) * 60);
-    const seconds = ((absolute - degrees - minutes / 60) * 3600).toFixed(2);
- 
+    let seconds = ((absolute - degrees - minutes / 60) * 3600).toFixed(2)
+    seconds = parseFloat(seconds).toString();
     const direction = (isLatitude ? (dd >= 0 ? 'N' : 'S') : (dd >= 0 ? 'E' : 'W'));
  
     return `${degrees}°${minutes}'${seconds}"${direction}`;
   }
- 
  
   hideData() {
     const airportCITY = this.TopElevationForm.get('CITY')?.value;

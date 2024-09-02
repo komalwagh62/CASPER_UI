@@ -77,40 +77,55 @@ export class UsersNOCASComponent implements OnInit {
     this.fetchAirports();
     this.showDefaultMap();
     this.requestForm = this.formBuilder.group({
-      service1: [false],
+     
       service2: [false],
-      service3: [false],
-      service4: [false],
-      service5: [false]
+     
     });
   }
  
   initializeForm() {
-  this.TopElevationForm = this.formbuilder.group({
-    Latitude: [
-      this.latitudeDMS || '',
-      [
-        Validators.required,
-        Validators.pattern(/^([0-8]?\d)°([0-5]?\d)'([0-5]?\d(\.\d+)?)"([NS])$/)
-      ]
-    ],
-    Longitude: [
-      this.longitudeDMS || '',
-      [
-        Validators.required,
-        Validators.pattern(/^([0-8]?\d)°([0-5]?\d)'([0-5]?\d(\.\d+)?)"([EW])$/)
-      ]
-    ],
+    this.TopElevationForm = this.formbuilder.group({
+      Latitude: [
+        this.latitudeDMS || '',
+        [
+          Validators.required,
+          Validators.pattern(/^(\d{1,3})[°\s]?(\d{1,2})[’'\s]?(\d{1,2}(?:\.\d+)?)[″"\s]?[NS]?$/i)
+        ]
+      ],
+      Longitude: [
+        this.longitudeDMS || '',
+        [
+          Validators.required,
+          Validators.pattern(/^(\d{1,3})[°\s]?(\d{1,2})[’'\s]?(\d{1,2}(?:\.\d+)?)[″"\s]?[EW]?$/i)
+        ]
+      ],  
     CITY: [''],
     location: [''],
     elevationOption: ['', Validators.required],
-    Site_Elevation: ['', [Validators.required, Validators.min(0), Validators.max(9999)]],
+    Site_Elevation: ['', []],
     snapshot: [''],
     airportName: [''],
     selectionMode: ['']
   });
 }
+
  
+ 
+parseDMS(input: string): { degrees: number, minutes: number, seconds: number, direction: string } | null {
+  const dmsPattern = /^(\d{1,3})[°\s]?(\d{1,2})[’'\s]?(\d{1,2}(?:\.\d+)?)[″"\s]?([NSWE])?$/i;
+  const match = input.match(dmsPattern);
+ 
+  if (match) {
+    return {
+      degrees: parseInt(match[1], 10),
+      minutes: parseInt(match[2], 10),
+      seconds: parseFloat(match[3]),
+      direction: match[4]
+    };
+  } else {
+    return null;
+  }
+}
  
   handleSelectionModeChanges() {
     this.TopElevationForm.get('selectionMode')?.valueChanges.subscribe((selectionMode: string) => {
@@ -136,21 +151,43 @@ export class UsersNOCASComponent implements OnInit {
   }
  
   handleLatitudeLongitudeChanges() {
+    // Watch for changes in Latitude
     this.TopElevationForm.get('Latitude').valueChanges.subscribe((latitudeDMS: string) => {
       const lat = this.convertDMSStringToDD(latitudeDMS);
-      this.updateMarkersPosition(lat, this.long);
-      if (this.TopElevationForm.value.selectionMode === 'default') {
-        this.updateNearestAirportData();
+      if (lat !== null) {
+        this.lat = lat; // Store the latitude value
+ 
+        // Update markers position only if longitude is also valid
+        if (this.long !== null) {
+          this.updateMarkersPosition(this.lat, this.long);
+        }
+ 
+        // Update nearest airport data if selectionMode is 'default'
+        if (this.TopElevationForm.value.selectionMode === 'default') {
+          this.updateNearestAirportData();
+        }
       }
     });
+ 
+    // Watch for changes in Longitude
     this.TopElevationForm.get('Longitude').valueChanges.subscribe((longitudeDMS: string) => {
       const lng = this.convertDMSStringToDD(longitudeDMS);
-      this.updateMarkersPosition(this.lat, lng);
-      if (this.TopElevationForm.value.selectionMode === 'default') {
-        this.updateNearestAirportData();
+      if (lng !== null) {
+        this.long = lng; // Store the longitude value
+ 
+        // Update markers position only if latitude is also valid
+        if (this.lat !== null) {
+          this.updateMarkersPosition(this.lat, this.long);
+        }
+ 
+        // Update nearest airport data if selectionMode is 'default'
+        if (this.TopElevationForm.value.selectionMode === 'default') {
+          this.updateNearestAirportData();
+        }
       }
     });
   }
+ 
  
   handleCityChanges() {
     this.TopElevationForm.get('CITY').valueChanges.subscribe((city: string) => {
@@ -280,9 +317,9 @@ export class UsersNOCASComponent implements OnInit {
       return;
     }
  
-    if (!this.TopElevationForm.valid) {
-      return;
-    }
+    // if (!this.TopElevationForm.valid) {
+    //   return;
+    // }
  
     const selectedAirportCITY = this.TopElevationForm.get('CITY')?.value;
     const nearestAirport = this.findNearestAirport(this.lat, this.long, 30);
@@ -336,7 +373,7 @@ export class UsersNOCASComponent implements OnInit {
               }
             })
             .catch(error => {
-             
+              console.error(error);
             });
         } else {
           if (selectionMode !== 'default') {
@@ -348,17 +385,28 @@ export class UsersNOCASComponent implements OnInit {
               });
             }
           } else {
-            this.toastr.info('No airport found within the specified radius.');
+            // this.toastr.info('No airport found within the specified radius.');
           }
         }
       })
       .catch(error => {
-        Swal.fire({
-          html: `The <span style="color: red;">${selectedAirportCITY}</span> airport does not have a published CCZM map. Please contact Cognitive Navigation for further assistance.`,
-          icon: 'warning',
-        });
+        console.error(error);
+        const selectionMode = this.TopElevationForm.get('selectionMode')?.value;
+        if (selectionMode === 'manual') {
+          Swal.fire({
+            html: `The <span style="color: red;">${selectedAirportCITY}</span> airport selected does not have a CCZM map published by the authorities. Please contact Cognitive Navigation for further assistance.`,
+            icon: 'warning',
+          });
+        } else if (selectionMode === 'default' && nearestAirport) {
+          console.log("defrt")
+          Swal.fire({
+            html: `The <span style="color: red;">${nearestAirport.airportCity}</span> nearest airport does not have a CCZM map published by the authorities. Please contact Cognitive Navigation for further assistance.`,
+            icon: 'warning',
+          });
+        }
       });
   }
+ 
  
  
   findNearestAirport(lat: number, lng: number, radius: number): { airportCity: string; airportName: string; distance: number; elevation: number } | null {
@@ -382,7 +430,16 @@ export class UsersNOCASComponent implements OnInit {
     } else {
       const selectionMode = this.TopElevationForm.get('selectionMode')?.value;
       if (selectionMode === 'default') {
-        this.toastr.info('Nearest airport data not found.');  // Show toastr message
+        if (this.geojsonLayer) {
+          this.map.removeLayer(this.geojsonLayer);
+          this.geojsonLayer.clearLayers();
+          this.geojsonLayer = null;
+        }
+        if (this.marker2) {
+          this.map.removeLayer(this.marker2);
+          this.marker2 = null;
+        }
+        this.toastr.info('No airport found within the specified radius.');  
       }
     }
     return closestAirport;
@@ -1034,25 +1091,19 @@ export class UsersNOCASComponent implements OnInit {
           this.marker = L.marker([this.lat, this.long]).addTo(map);
         })
         .catch(error => {
-          const selectionMode = this.TopElevationForm.get('selectionMode')?.value;
-          if (selectionMode === 'manual') {
-          Swal.fire({
-            html: `The <span style="color: red;">${selectedAirportCITY}</span> airport selected does not have a CCZM map published by the authorities. Please contact Cognitive Navigation for further assistance.`,
-            icon: 'warning',
-          });
-        }
+         
        
         });
     }
   }
  
  
-  updateNearestAirportData() {
+updateNearestAirportData() {
     const nearestAirport = this.findNearestAirport(this.lat, this.long, 30);
     const selectionMode = this.TopElevationForm.get('selectionMode')?.value;
  
     if (!nearestAirport) {
-      this.toastr.info('Nearest airport data not found.');
+      // this.toastr.info('Nearest airport data not found.');
       return;
     }
  
@@ -1092,12 +1143,7 @@ export class UsersNOCASComponent implements OnInit {
         }
       })
       .catch(error => {
-        if (this.isGeoJSONNotFound) {
-          Swal.fire({
-            html: `The <span style="color: red;">${nearestAirport.airportCity}</span> airport selected does not have a CCZM map published by the authorities. Please contact Cognitive Navigation for further assistance.`,
-            icon: 'warning',
-          });
-        }
+       
         console.error('Error loading GeoJSON file:', error);
       });
   }
@@ -1178,28 +1224,23 @@ export class UsersNOCASComponent implements OnInit {
       });
   }
  
- navigateToContact() {
+ 
+  navigateToContact() {
     this.router.navigate(['/request-Service']);
   }
- 
-  convertDMSStringToDD(dms: string): number | null {
-    const regex = /^(\d{1,2})°(\d{1,2})'(\d{1,2}(?:\.\d+)?)"([NSWE])$/;
-    const match = dms.match(regex);
- 
-    if (match) {
-      const degrees = parseFloat(match[1]);
-      const minutes = parseFloat(match[2]);
-      const seconds = parseFloat(match[3]);
-      const direction = match[4];
- 
-      let dd = degrees + minutes / 60 + seconds / 3600;
+  convertDMSStringToDD(dmsString: string): number | null {
+    const parsed = this.parseDMS(dmsString);
+    if (parsed) {
+      const { degrees, minutes, seconds, direction } = parsed;
+      let dd = degrees + (minutes / 60) + (seconds / 3600);
       if (direction === 'S' || direction === 'W') {
-        dd = -dd;
+        dd *= -1;
       }
       return dd;
     }
     return null;
   }
+ 
  
   captureScreenshot(): Promise<string | null> {
     return new Promise((resolve, reject) => {
@@ -1754,12 +1795,11 @@ export class UsersNOCASComponent implements OnInit {
   }
  
   showMap(lat: number, lng: number) {
-    this.map = L.map('map', { zoomControl: false, }).setView([20.5937, 78.9629], 5);
+    this.map = L.map('map', { zoomControl: false, attributionControl: false }).setView([20.5937, 78.9629], 5);
  
  
     const streets = L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
       subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
-        //  attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">Casper</a>'
     });
  
     const darkMatter = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {});
@@ -1815,7 +1855,7 @@ export class UsersNOCASComponent implements OnInit {
  
     L.control.layers(baseMaps, overlayMaps, { position: 'topright' }).addTo(this.map);
     streets.addTo(this.map);
-    L.control.scale({ position: 'bottomleft', metric: false }).addTo(this.map);
+    L.control.scale({ position: 'bottomright', metric: false }).addTo(this.map);
     L.control.zoom({ position: 'bottomright' }).addTo(this.map);
  
     if (this.marker) {
@@ -1940,6 +1980,4 @@ export class UsersNOCASComponent implements OnInit {
  
  
 }
- 
-
  

@@ -14,6 +14,7 @@ export class ApiService {
   [x: string]: any;
   isAuthenticated: boolean = false;
   public baseUrl: string = 'http://ec2-3-142-142-5.us-east-2.compute.amazonaws.com:3001/api';
+  // public baseUrl: string = 'http://localhost:3001/api';
   public loginUserId: string = '';
   public userData!: User;
   public token: string = '';

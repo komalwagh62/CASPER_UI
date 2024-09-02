@@ -27,7 +27,8 @@ export class UsersHomeComponent implements OnInit {
   subscriptionDataSource = new MatTableDataSource<any>();
   permissibleDataSource = new MatTableDataSource<any>();
   serviceDataSource = new MatTableDataSource<any>();
-  serviceDisplayedColumns: string[] = ['serviceNames'];
+  serviceDisplayedColumns: string[] = ['serviceNames', 'createdAt'];
+ 
  
   @ViewChild('subscriptionPaginator') subscriptionPaginator!: MatPaginator;
   @ViewChild('permissiblePaginator') permissiblePaginator!: MatPaginator;
@@ -41,6 +42,7 @@ export class UsersHomeComponent implements OnInit {
   expandedElement: any | null;
   permissibleDisplayedColumns: string[] = ['city', 'airport_name', 'download','Apply NOC', 'expand'];
   subscriptionDetails: any[] = [];
+ 
   serviceDetails: any[] = [];
   permissibleDetails: any[] = [];
   showSubscriptionDetails: boolean = false;
@@ -61,7 +63,8 @@ export class UsersHomeComponent implements OnInit {
     'service2': 'NOC Application & Associated Service',
     'service3': 'Pre-aeronautical Study',
     'service4': 'Aeronautical Study / Shielding Benefits Study',
-    'service5': 'Documents & Process Management'
+    'service5': 'Documents & Process Management',
+    'service6': 'Session with SME'
   };
   nocas: any;
   airport: any;
@@ -156,30 +159,31 @@ export class UsersHomeComponent implements OnInit {
     this.showSubscriptionDetails = false;
     this.showServiceDetails = true;
     this.showPermissibleDetails = false;
+ 
     const headers = new HttpHeaders().set("Authorization", `Bearer ${this.apiservice.token}`);
     const user_id = this.apiservice.userData.id;
  
     this.apiservice.getServiceDetails(user_id).subscribe(
-        response => {
-          // Parse and map the services data
+      response => {
+        // Parse and map the services data, including createdAt
+        this.serviceDetails = response.map(service => ({
+          ...service,
+          services: JSON.parse(service.services), // Ensure services is parsed as an object
+          date: service.createdAt // Include the createdAt field in your mapping
+        }));
  
-          this.serviceDetails = response.map(service => ({
-            ...service,
-            services: JSON.parse(service.services) // Ensure services is parsed as an object
-          }));
+        console.log('Parsed Services:', this.serviceDetails);
  
-          console.log('Parsed Services:', this.serviceDetails);
+        // Apply filtering logic
+        this.filterServices();
  
-          // Apply filtering logic
-          this.filterServices();
- 
-          // Update MatTableDataSource
-          this.updateTableData();
-        },
-        error => {
-          console.error('Failed to fetch services data:', error);
-        }
-      );
+        // Update MatTableDataSource
+        this.updateTableData();
+      },
+      error => {
+        console.error('Failed to fetch services data:', error);
+      }
+    );
   }
  
  
@@ -194,7 +198,6 @@ export class UsersHomeComponent implements OnInit {
     console.log('Filtered Services:', this.filterserviceDetails);
   }
  
- 
   getActiveServiceNames(services: { [key: string]: boolean }): string[] {
     return Object.keys(services)
       .filter(key => services[key] === true)
@@ -205,14 +208,26 @@ export class UsersHomeComponent implements OnInit {
     return this.serviceNames[key] || key;
   }
  
- 
   updateTableData() {
-    this.serviceDataSource.data = this.filterserviceDetails;
-    this.serviceDataSource.paginator = this.servicePaginator;
-    this.serviceRowCount = this.serviceDataSource.data.length;
-    this.serviceDataSource.sort = this.serviceSort;
-  }
+    this.serviceDataSource = new MatTableDataSource(this.filterserviceDetails);
  
+    // Set custom filter predicate for date and service name filtering
+    this.serviceDataSource.filterPredicate = (data: any, filter: string) => {
+      const transformedFilter = filter.trim().toLowerCase();
+      const dateStr = this.datePipe.transform(data.createdAt, 'dd/MM/yyyy');
+      return (
+        data.activeServiceNames.join(' ').toLowerCase().includes(transformedFilter) ||
+        (dateStr && dateStr.includes(transformedFilter))
+      );
+    };
+ 
+    // Update the paginator and sorting for the table
+    this.serviceDataSource.paginator = this.servicePaginator;
+    this.serviceDataSource.sort = this.serviceSort;
+ 
+    // Update row count
+    this.serviceRowCount = this.serviceDataSource.data.length;
+  }
  
   applyServiceFilter(event: Event) {
     const filterValue = (event.target as HTMLInputElement).value.toLowerCase();

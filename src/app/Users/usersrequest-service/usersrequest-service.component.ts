@@ -16,7 +16,7 @@ export class UsersrequestServiceComponent implements OnInit {
  
   constructor(
     private formBuilder: FormBuilder,
-    private apiService: ApiService, // Inject ApiService
+    private apiService: ApiService,
     private router: Router,
     private toastr: ToastrService // Inject ToastrService
   ) {}
@@ -27,14 +27,17 @@ export class UsersrequestServiceComponent implements OnInit {
       service2: [false],
       service3: [false],
       service4: [false],
-      service5: [false]
+      service5: [false],
+      service6: [false]
     });
+   
  
     this.getUserDetails();
   }
  
   createRequest() {
     if (this.requestForm.valid) {
+      console.log(this.requestForm.value);  // Check the form values here
       const requestData = {
         services: JSON.stringify(this.requestForm.value),
         user_id: this.apiService.userData.id
@@ -52,6 +55,7 @@ export class UsersrequestServiceComponent implements OnInit {
       this.toastr.warning('Please select a service.');
     }
   }
+ 
  
   getUserDetails(): void {
     this.apiService.getUserDetails().subscribe(

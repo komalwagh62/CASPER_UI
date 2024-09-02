@@ -3,7 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ApiService } from '../Shared/Api/api.service';
 import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr'; // Import ToastrService
- 
+import Swal from 'sweetalert2';
 @Component({
   selector: 'app-usersrequest-service',
   templateUrl: './usersrequest-service.component.html',
@@ -37,14 +37,19 @@ export class UsersrequestServiceComponent implements OnInit {
  
   createRequest() {
     if (this.requestForm.valid) {
-      console.log(this.requestForm.value);  // Check the form values here
+      (this.requestForm.value);  // Check the form values here
       const requestData = {
         services: JSON.stringify(this.requestForm.value),
         user_id: this.apiService.userData.id
       };
       this.apiService.createRequest(requestData).subscribe(
         (result) => {
-          this.toastr.success("Request created successfully");
+          Swal.fire({
+            title: 'Success!',
+            text: `We have noted your request. Our team will contact you within 1 working day.`,
+            icon: 'success',
+            confirmButtonText: 'OK'
+          });
         },
         (error) => {
           console.error("Error creating request:", error);

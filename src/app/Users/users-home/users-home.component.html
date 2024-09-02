@@ -136,7 +136,7 @@
         <mat-row *matRowDef="let row; columns: ['expandedDetail'];" class="expanded-row"
           [style.display]="expandedElement === row ? 'table-row' : 'none'"></mat-row>
       </mat-table>
-      <mat-paginator #permissiblePaginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
+      <mat-paginator #permissiblePaginator [pageSizeOptions]="[5, 10, 25, 100]" showFirstLastButtons></mat-paginator>
     </div>
   </div>
  
@@ -191,7 +191,7 @@
       <mat-row
         *matRowDef="let row; columns: ['subscription_id', 'subscription_status','createdAt','expiry_date','price', 'subscription_type'];"></mat-row>
     </mat-table>
-    <mat-paginator #subscriptionPaginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
+    <mat-paginator #subscriptionPaginator [pageSizeOptions]="[5, 10, 25, 100]" showFirstLastButtons></mat-paginator>
   </div>
  
   <mat-form-field *ngIf="showServiceDetails">
@@ -233,6 +233,6 @@
     </div>
  
     <!-- Paginator -->
-    <mat-paginator #servicePaginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
+    <mat-paginator #servicePaginator [pageSizeOptions]="[5, 10, 25, 100]" showFirstLastButtons></mat-paginator>
   </div>
 </section>

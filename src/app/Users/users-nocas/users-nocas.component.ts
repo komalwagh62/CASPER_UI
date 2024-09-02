@@ -58,14 +58,14 @@ export class UsersNOCASComponent implements OnInit {
   latitudeErrors: any;
   longitudeErrors: any;
   requestForm!: FormGroup;
-  constructor( private formBuilder: FormBuilder,private toastr: ToastrService, public apiservice: ApiService, private formbuilder: FormBuilder, private http: HttpClient, private router: Router) {
-   
-   }
+  constructor(private formBuilder: FormBuilder, private toastr: ToastrService, public apiservice: ApiService, private formbuilder: FormBuilder, private http: HttpClient, private router: Router) {
+ 
+  }
  
   _filterAirports(value: string): any[] {
     const filterValue = value.toLowerCase();
     const filtered = this.airports.filter(airport => airport.airport_city.toLowerCase().includes(filterValue));
-    console.log(filtered); // Check if the filtered list is being populated
+    (filtered); // Check if the filtered list is being populated
     return filtered;
   }
   ngOnInit(): void {
@@ -77,9 +77,9 @@ export class UsersNOCASComponent implements OnInit {
     this.fetchAirports();
     this.showDefaultMap();
     this.requestForm = this.formBuilder.group({
-     
+ 
       service2: [false],
-     
+ 
     });
   }
  
@@ -98,34 +98,32 @@ export class UsersNOCASComponent implements OnInit {
           Validators.required,
           Validators.pattern(/^(\d{1,3})[°\s]?(\d{1,2})[’'\s]?(\d{1,2}(?:\.\d+)?)[″"\s]?[EW]?$/i)
         ]
-      ],  
-    CITY: [''],
-    location: [''],
-    elevationOption: ['', Validators.required],
-    Site_Elevation: ['', []],
-    snapshot: [''],
-    airportName: [''],
-    selectionMode: ['']
-  });
-}
-
- 
- 
-parseDMS(input: string): { degrees: number, minutes: number, seconds: number, direction: string } | null {
-  const dmsPattern = /^(\d{1,3})[°\s]?(\d{1,2})[’'\s]?(\d{1,2}(?:\.\d+)?)[″"\s]?([NSWE])?$/i;
-  const match = input.match(dmsPattern);
- 
-  if (match) {
-    return {
-      degrees: parseInt(match[1], 10),
-      minutes: parseInt(match[2], 10),
-      seconds: parseFloat(match[3]),
-      direction: match[4]
-    };
-  } else {
-    return null;
+      ],
+      CITY: [''],
+      location: [''],
+      elevationOption: ['', Validators.required],
+      Site_Elevation: ['', []],
+      snapshot: [''],
+      airportName: [''],
+      selectionMode: ['']
+    });
   }
-}
+ 
+  parseDMS(input: string): { degrees: number, minutes: number, seconds: number, direction: string } | null {
+    const dmsPattern = /^(\d{1,3})[°\s]?(\d{1,2})[’'\s]?(\d{1,2}(?:\.\d+)?)[″"\s]?([NSWE])?$/i;
+    const match = input.match(dmsPattern);
+ 
+    if (match) {
+      return {
+        degrees: parseInt(match[1], 10),
+        minutes: parseInt(match[2], 10),
+        seconds: parseFloat(match[3]),
+        direction: match[4]
+      };
+    } else {
+      return null;
+    }
+  }
  
   handleSelectionModeChanges() {
     this.TopElevationForm.get('selectionMode')?.valueChanges.subscribe((selectionMode: string) => {
@@ -144,7 +142,7 @@ parseDMS(input: string): { degrees: number, minutes: number, seconds: number, di
           airportName: ''
         });
       }
-   
+ 
       cityControl?.updateValueAndValidity();
       airportNameControl?.updateValueAndValidity();
     });
@@ -192,7 +190,7 @@ parseDMS(input: string): { degrees: number, minutes: number, seconds: number, di
   handleCityChanges() {
     this.TopElevationForm.get('CITY').valueChanges.subscribe((city: string) => {
       this.city = city;
- 
+      this.onCityChange();
       // Remove any existing GeoJSON layers or markers
       if (this.geojsonLayer) {
         this.map.removeLayer(this.geojsonLayer);
@@ -224,6 +222,23 @@ parseDMS(input: string): { degrees: number, minutes: number, seconds: number, di
       // Handle GeoJSON loading for the selected city
       this.handleGeoJSONLoading(city);
     });
+  }
+ 
+  onCityChange() {
+    const selectedCity = this.TopElevationForm.get('CITY')?.value;
+    const elevationOptionControl = this.TopElevationForm.get('elevationOption')?.value;
+ 
+    // Check if the default elevation option is selected
+    if (elevationOptionControl === 'default') {
+      const elevation = this.getElevationForCity(selectedCity); // Fetch the elevation for the city
+      const defaultElevation = this.feetToMeters(elevation); // Convert to meters if needed
+ 
+      // Update the form with the default elevation
+      this.TopElevationForm.patchValue({ Site_Elevation: defaultElevation });
+ 
+      // Notify the user
+      this.toastr.info(`Elevation updated based on the selected city (${selectedCity}).`);
+    }
   }
  
  
@@ -394,19 +409,18 @@ parseDMS(input: string): { degrees: number, minutes: number, seconds: number, di
         const selectionMode = this.TopElevationForm.get('selectionMode')?.value;
         if (selectionMode === 'manual') {
           Swal.fire({
-            html: `The <span style="color: red;">${selectedAirportCITY}</span> airport selected does not have a CCZM map published by the authorities. Please contact Cognitive Navigation for further assistance.`,
+            html: `The selected airport <span style="color: red;">${selectedAirportCITY}</span> does not have a CCZM map published by the authorities. Please contact Cognitive Navigation for further assistance.`,
             icon: 'warning',
           });
         } else if (selectionMode === 'default' && nearestAirport) {
-          console.log("defrt")
+          ("defrt")
           Swal.fire({
-            html: `The <span style="color: red;">${nearestAirport.airportCity}</span> nearest airport does not have a CCZM map published by the authorities. Please contact Cognitive Navigation for further assistance.`,
+            html: `The nearest airport <span style="color: red;">${nearestAirport.airportCity}</span> does not have a CCZM map published by the authorities. Please contact Cognitive Navigation for further assistance.`,
             icon: 'warning',
           });
         }
       });
   }
- 
  
  
   findNearestAirport(lat: number, lng: number, radius: number): { airportCity: string; airportName: string; distance: number; elevation: number } | null {
@@ -426,7 +440,7 @@ parseDMS(input: string): { degrees: number, minutes: number, seconds: number, di
       }
     }
     if (closestAirport) {
-      console.log(`Nearest Airport: ${closestAirport.airportName}, Distance: ${closestAirport.distance}`);
+      (`Nearest Airport: ${closestAirport.airportName}, Distance: ${closestAirport.distance}`);
     } else {
       const selectionMode = this.TopElevationForm.get('selectionMode')?.value;
       if (selectionMode === 'default') {
@@ -439,15 +453,13 @@ parseDMS(input: string): { degrees: number, minutes: number, seconds: number, di
           this.map.removeLayer(this.marker2);
           this.marker2 = null;
         }
-        this.toastr.info('No airport found within the specified radius.');  
+        this.toastr.info('No airport found within the specified radius.');
       }
     }
     return closestAirport;
   }
  
   updateMarkersPosition(lat: number | null, lng: number | null): void {
-    console.log('Updating position:', { lat, lng });
- 
     this.lat = lat !== null ? lat : this.lat;
     this.long = lng !== null ? lng : this.long;
  
@@ -455,8 +467,6 @@ parseDMS(input: string): { degrees: number, minutes: number, seconds: number, di
   }
  
   updateMarkerPosition(): void {
-    console.log('Updating marker position:', { lat: this.lat, lng: this.long });
- 
     if (this.marker) {
       if (!isNaN(this.lat) && !isNaN(this.long)) {
         this.latitudeDMS = this.convertDDtoDMS(this.lat, true);
@@ -475,630 +485,216 @@ parseDMS(input: string): { degrees: number, minutes: number, seconds: number, di
       console.error("Map object is required to load GeoJSON.");
       return;
     }
+ 
+    // Remove existing GeoJSON layer and marker if they exist
     if (this.geojsonLayer) {
       map.removeLayer(this.geojsonLayer);
       this.geojsonLayer.clearLayers();
       this.geojsonLayer = null;
     }
+ 
     if (this.marker2) {
       map.removeLayer(this.marker2);
       this.marker2 = null;
     }
+ 
+    // Get selected city from the form
     const selectedAirportCITY = this.TopElevationForm.get('CITY')?.value;
     if (selectedAirportCITY) {
-      let airportGeoJSONPath: string;
-      switch (selectedAirportCITY) {
-        case 'Puri':
-          airportGeoJSONPath = 'assets/GeoJson/Puri.geojson';
-          this.airportCoordinates = [19.81, 85.83];
-          break;
-        case 'Mumbai':
-          airportGeoJSONPath = 'assets/GeoJson/Mumbai.geojson';
-          this.airportCoordinates = [19.09155556, 72.86597222];
-          break;
-        case 'Coimbatore':
-          airportGeoJSONPath = 'assets/GeoJson/Coimbatore.geojson';
-          this.airportCoordinates = [11.02691111, 77.04180278];
-          break;
-        case 'Ahemdabad':
-          airportGeoJSONPath = 'assets/GeoJson/Ahemdabad.geojson';
-          this.airportCoordinates = [23.07119167, 72.62643333];
-          break;
-        case 'Akola':
-          airportGeoJSONPath = 'assets/GeoJson/Akola.geojson';
-          this.airportCoordinates = [20.69851583, 77.05776056];
-          break;
-        case 'Chennai':
-          airportGeoJSONPath = 'assets/GeoJson/Chennai.geojson';
-          this.airportCoordinates = [12.99510000, 80.17360278];
-          break;
-        case 'Delhi':
-          airportGeoJSONPath = 'assets/GeoJson/Delhi.geojson';
-          this.airportCoordinates = [28.61, 77.20];
-          break;
-        case 'Guwahati':
-          airportGeoJSONPath = 'assets/GeoJson/Guwahati.geojson';
-          this.airportCoordinates = [26.10502222, 91.58543889];
-          break;
-        case 'Hyderabad':
-          airportGeoJSONPath = 'assets/GeoJson/Hydrabad.geojson';
-          this.airportCoordinates = [17.38, 78.48];
-          break;
-        case 'Jaipur':
-          airportGeoJSONPath = 'assets/GeoJson/Jaipur.geojson';
-          this.airportCoordinates = [26.82417278, 75.80247833];
-          break;
-        case 'Nagpur':
-          airportGeoJSONPath = 'assets/GeoJson/Nagpur.geojson';
-          this.airportCoordinates = [21.09172500, 79.04819722];
-          break;
-        case 'Thiruvananthapuram':
-          airportGeoJSONPath = 'assets/GeoJson/Trivendrum.geojson';
-          this.airportCoordinates = [8.49319444, 76.90915833];
-          break;
-        case 'Vadodara':
-          airportGeoJSONPath = 'assets/GeoJson/Vadodara.geojson';
-          this.airportCoordinates = [22.33004167, 73.21884444];
-          break;
-        case 'Varanasi':
-          airportGeoJSONPath = 'assets/GeoJson/Varanasi.geojson';
-          this.airportCoordinates = [25.45121111, 82.85860556];
-          break;
-        case 'Agatti':
-          airportGeoJSONPath = 'assets/GeoJson/Agatti.geojson';
-          this.airportCoordinates = [10.82421944, 72.17663611];
-          break;
-        case 'Aligarh':
-          airportGeoJSONPath = 'assets/GeoJson/Aligarh.geojson';
-          this.airportCoordinates = [27.86130000, 78.14706944];
-          break;
-        case 'Ambikapur':
-          airportGeoJSONPath = 'assets/GeoJson/Ambikapur.geojson';
-          this.airportCoordinates = [22.99345833, 83.19275222];
-          break;
-        case 'Amritsar':
-          airportGeoJSONPath = 'assets/GeoJson/Amritsar.geojson';
-          this.airportCoordinates = [31.71059167, 74.80015556];
-          break;
-        case 'Aurangabad':
-          airportGeoJSONPath = 'assets/GeoJson/Aurangabad.geojson';
-          this.airportCoordinates = [19.86439444, 75.39756111];
-          break;
-        case 'Azamgarh':
-          airportGeoJSONPath = 'assets/GeoJson/Azamgarh.geojson';
-          this.airportCoordinates = [26.15734917, 83.11402361];
-          break;
-        case 'Balurghat':
-          airportGeoJSONPath = 'assets/GeoJson/Balurghat.geojson';
-          this.airportCoordinates = [25.26355000, 88.79562750];
-          break;
-        case 'Baramati':
-          airportGeoJSONPath = 'assets/GeoJson/Baramati.geojson';
-          this.airportCoordinates = [18.22662222, 74.58969722];
-          break;
-        case 'Belgaum':
-          airportGeoJSONPath = 'assets/GeoJson/Belgaum.geojson';
-          this.airportCoordinates = [15.85840278, 74.61769167];
-          break;
-        case 'Berhampur':
-          airportGeoJSONPath = 'assets/GeoJson/Berhampur.geojson';
-          this.airportCoordinates = [19.29156278, 84.87916861];
-          break;
-        case 'Bial':
-          airportGeoJSONPath = 'assets/GeoJson/Bial.geojson';
-          this.airportCoordinates = [13.19887167, 77.70547778];
-          break;
-        case 'Bokaro':
-          airportGeoJSONPath = 'assets/GeoJson/Bokaro.geojson';
-          this.airportCoordinates = [23.64352944, 86.14964472];
-          break;
-        case 'Cochin':
-          airportGeoJSONPath = 'assets/GeoJson/Cochin.geojson';
-          this.airportCoordinates = [10.15, 76.40];
-          break;
-        case 'Deesa':
-          airportGeoJSONPath = 'assets/GeoJson/Deesa.geojson';
-          this.airportCoordinates = [24.26777778, 72.20277778];
-          break;
-        case 'Diburgarh':
-          airportGeoJSONPath = 'assets/GeoJson/Diburgarh.geojson';
-          this.airportCoordinates = [27.48231111, 95.01706389];
-          break;
-        case 'Diu':
-          airportGeoJSONPath = 'assets/GeoJson/Diu.geojson';
-          this.airportCoordinates = [20.71379444, 70.92288056];
-          break;
-        case 'Durgapur':
-          airportGeoJSONPath = 'assets/GeoJson/Durgapur.geojson';
-          this.airportCoordinates = [23.62444444, 87.24250000];
-          break;
-        case 'Gaya':
-          airportGeoJSONPath = 'assets/GeoJson/Gaya.geojson';
-          this.airportCoordinates = [24.74803889, 84.94243611];
-          break;
-        case 'Hisar':
-          airportGeoJSONPath = 'assets/GeoJson/Hisar.geojson';
-          this.airportCoordinates = [29.15, 75.73];
-          break;
-        case 'Hubli':
-          airportGeoJSONPath = 'assets/GeoJson/Hubli.geojson';
-          this.airportCoordinates = [15.36183889, 75.08436667];
-          break;
-        case 'Imphal':
-          airportGeoJSONPath = 'assets/GeoJson/Imphal.geojson';
-          this.airportCoordinates = [24.76431667, 93.89963889];
-          break;
-        case 'Jabalpur':
-          airportGeoJSONPath = 'assets/GeoJson/Jabalpur.geojson';
-          this.airportCoordinates = [23.18337222, 80.06044444];
-          break;
-        case 'Jewer':
-          airportGeoJSONPath = 'assets/GeoJson/Jewer.geojson';
-          this.airportCoordinates = [28.17561111, 77.60624167];
-          break;
-        case 'Jharsaugada':
-          airportGeoJSONPath = 'assets/GeoJson/Jharsaugada.geojson';
-          this.airportCoordinates = [21.91481944, 84.04869167];
-          break;
-        case 'Jogbani':
-          airportGeoJSONPath = 'assets/GeoJson/Jogbani.geojson';
-          this.airportCoordinates = [26.29618056, 87.28654722];
-          break;
-        case 'Kadapa':
-          airportGeoJSONPath = 'assets/GeoJson/Kadapa.geojson';
-          this.airportCoordinates = [14.51304722, 78.77219167];
-          break;
-        case 'Kandla':
-          airportGeoJSONPath = 'assets/GeoJson/Kandla.geojson';
-          this.airportCoordinates = [23.11220000, 70.10056667];
-          break;
-        case 'Kangra':
-          airportGeoJSONPath = 'assets/GeoJson/Kangra.geojson';
-          this.airportCoordinates = [32.16473611, 76.26215556];
-          break;
-        case 'Kannur':
-          airportGeoJSONPath = 'assets/GeoJson/Kannur.geojson';
-          this.airportCoordinates = [11.91573056, 75.54572222];
-          break;
-        case 'Keshod':
-          airportGeoJSONPath = 'assets/GeoJson/Keshod.geojson';
-          this.airportCoordinates = [21.31498889, 70.26913889];
-          break;
-        case 'Khajuraho':
-          airportGeoJSONPath = 'assets/GeoJson/Khajuraho.geojson';
-          this.airportCoordinates = [24.81983056, 79.91857500];
-          break;
-        case 'Kishangarh':
-          airportGeoJSONPath = 'assets/GeoJson/Kishangarh.geojson';
-          this.airportCoordinates = [26.60125, 74.81415];
-          break;
-        case 'Kullu':
-          airportGeoJSONPath = 'assets/GeoJson/Kullu.geojson';
-          this.airportCoordinates = [31.87681389, 77.15525833];
-          break;
-        case 'Kurnool':
-          airportGeoJSONPath = 'assets/GeoJson/Kurnool.geojson';
-          this.airportCoordinates = [15.71475556, 78.16298611];
-          break;
-        case 'Kushinagar':
-          airportGeoJSONPath = 'assets/GeoJson/Kushinagar.geojson';
-          this.airportCoordinates = [26.77277778, 83.89527778];
-          break;
-        case 'Lalitpur':
-          airportGeoJSONPath = 'assets/GeoJson/Lalitpur.geojson';
-          this.airportCoordinates = [24.71647083, 78.41612444];
-          break;
-        case 'Lilabari':
-          airportGeoJSONPath = 'assets/GeoJson/Lilabari.geojson';
-          this.airportCoordinates = [27.29122778, 94.09352778];
-          break;
-        case 'Lucknow':
-          airportGeoJSONPath = 'assets/GeoJson/Lucknow.geojson';
-          this.airportCoordinates = [26.76185278, 80.88342778];
-          break;
-        case 'Ludhiana':
-          airportGeoJSONPath = 'assets/GeoJson/Ludiana.geojson';
-          this.airportCoordinates = [30.90, 75.85];
-          break;
-        case 'Mangalore':
-          airportGeoJSONPath = 'assets/GeoJson/Manglore.geojson';
-          this.airportCoordinates = [12.96206111, 74.88978611];
-          break;
-        case 'Meerut':
-          airportGeoJSONPath = 'assets/GeoJson/Meerut.geojson';
-          this.airportCoordinates = [28.90489833, 77.67712167];
-          break;
-        case 'Muzaffarpur':
-          airportGeoJSONPath = 'assets/GeoJson/Muzaffarpur.geojson';
-          this.airportCoordinates = [26.12, 85.38];
-          break;
-        case 'Mysore':
-          airportGeoJSONPath = 'assets/GeoJson/Mysore.geojson';
-          this.airportCoordinates = [12.30, 76.65];
-          break;
-        case 'Nanded':
-          airportGeoJSONPath = 'assets/GeoJson/Nanded.geojson';
-          this.airportCoordinates = [19.18103861, 77.32254722];
-          break;
-        case 'Pakyong':
-          airportGeoJSONPath = 'assets/GeoJson/Packyong.geojson';
-          this.airportCoordinates = [27.13, 88.61];
-          break;
-        case 'Pantnagar':
-          airportGeoJSONPath = 'assets/GeoJson/Patanagar.geojson';
-          this.airportCoordinates = [29.03214722, 79.47246944];
-          break;
-        case 'Patna':
-          airportGeoJSONPath = 'assets/GeoJson/Patna.geojson';
-          this.airportCoordinates = [25.59361111, 85.09183333];
-          break;
-        case 'Porbandar':
-          airportGeoJSONPath = 'assets/GeoJson/Porbandar.geojson';
-          this.airportCoordinates = [21.65034583, 69.65880028];
-          break;
-        case 'Rajamundary':
-          airportGeoJSONPath = 'assets/GeoJson/Rajamundary.geojson';
-          this.airportCoordinates = [17.10944444, 81.81944444];
-          break;
-        case 'Rourkela':
-          airportGeoJSONPath = 'assets/GeoJson/Rourkela.geojson';
-          this.airportCoordinates = [22.25623889, 84.81460833];
-          break;
-        case 'Shirdi':
-          airportGeoJSONPath = 'assets/GeoJson/Shirdi.geojson';
-          this.airportCoordinates = [19.69083333, 74.37166667];
-          break;
-        case 'Sholapur':
-          airportGeoJSONPath = 'assets/GeoJson/Sholapur.geojson';
-          this.airportCoordinates = [17.62765278, 75.93403889];
-          break;
-        case 'Tiruchirapalli':
-          airportGeoJSONPath = 'assets/GeoJson/Tiruchirapalli.geojson';
-          this.airportCoordinates = [10.765, 78.710];
-          break;
-        case 'Tirupati':
-          airportGeoJSONPath = 'assets/GeoJson/Tirupati.geojson';
-          this.airportCoordinates = [13.63296389, 79.54190833];
-          break;
-        case 'Udaipur':
-          airportGeoJSONPath = 'assets/GeoJson/Udaipur.geojson';
-          this.airportCoordinates = [24.61754056, 73.89445972];
-          break;
-        case 'Utkela':
-          airportGeoJSONPath = 'assets/GeoJson/Utkela.geojson';
-          this.airportCoordinates = [20.09765028, 83.18355250];
-          break;
-        case 'Vellore':
-          airportGeoJSONPath = 'assets/GeoJson/Vellore.geojson';
-          this.airportCoordinates = [12.90810639, 79.06714361];
-          break;
-        case 'Warangal':
-          airportGeoJSONPath = 'assets/GeoJson/Warangal.geojson';
-          this.airportCoordinates = [17.91703361, 79.59933194];
-          break;
-        case 'Calicut':
-          airportGeoJSONPath = 'assets/GeoJson/Calicut.geojson';
-          this.airportCoordinates = [11.13785000, 75.95057222];
-          break;
-        case 'Agartala':
-          airportGeoJSONPath = 'assets/GeoJson/Agartala.geojson';
-          this.airportCoordinates = [23.89055556, 91.23916667];
-          break;
-        case 'Dimapur':
-          airportGeoJSONPath = 'assets/GeoJson/Dimapur.geojson';
-          this.airportCoordinates = [25.88345756, 93.77135750];
-          break;
-        case 'Kota':
-          airportGeoJSONPath = 'assets/GeoJson/Kota.geojson';
-          this.airportCoordinates = [25.16008333, 75.84783333];
-          break;
-        case 'Madurai':
-          airportGeoJSONPath = 'assets/GeoJson/Madurai.geojson';
-          this.airportCoordinates = [9.83500000, 78.08861111];
-          break;
-        case 'Kolhapur':
-          airportGeoJSONPath = 'assets/GeoJson/Kolhapur.geojson';
-          this.airportCoordinates = [16.66637222, 74.29048056];
-          break;
-        case 'Kolkata':
-          airportGeoJSONPath = 'assets/GeoJson/Kolkata.geojson';
-          this.airportCoordinates = [22.65473944, 88.44672222];
-          break;
-        case 'Bhopal':
-          airportGeoJSONPath = 'assets/GeoJson/Bhopal.geojson';
-          this.airportCoordinates = [23.28691944, 77.33696389];
-          break;
-        case 'Mopa':
-          airportGeoJSONPath = 'assets/GeoJson/Mopa.geojson';
-          this.airportCoordinates = [15.74249889, 73.86701028];
-          break;
-        case 'Bhavnagar':
-          airportGeoJSONPath = 'assets/GeoJson/Bhavnagar.geojson';
-          this.airportCoordinates = [21.75425139, 72.19052528];
-          break;
-        case 'Dehradun':
-          airportGeoJSONPath = 'assets/GeoJson/Dehradun.geojson';
-          this.airportCoordinates = [30.19063056, 78.18222222];
-          break;
-        case 'Hirsar':
-          airportGeoJSONPath = 'assets/GeoJson/Hirsar.geojson';
-          this.airportCoordinates = [29.1833, 75.7167];
-          break;
-        case 'Jamshedpur':
-          airportGeoJSONPath = 'assets/GeoJson/Jamshedpur.geojson';
-          this.airportCoordinates = [22.81455417, 86.16901472];
-          break;
-        case 'Deoghar':
-          airportGeoJSONPath = 'assets/GeoJson/Deoghar.geojson';
-          this.airportCoordinates = [24.44637500, 86.71666667];
-          break;
-        case 'Donakonda':
-          airportGeoJSONPath = 'assets/GeoJson/Donakonda.geojson';
-          this.airportCoordinates = [15.82472167, 79.48233389];
-          break;
-        case 'Shimla':
-          airportGeoJSONPath = 'assets/GeoJson/Shimla.geojson';
-          this.airportCoordinates = [31.08158083, 77.06767694];
-          break;
-        case 'Cooch Behar':
-          airportGeoJSONPath = 'assets/GeoJson/CoochBehar.geojson';
-          this.airportCoordinates = [26.32965556, 89.46711389];
-          break;
-        case 'Bhuvneshwar':
-          airportGeoJSONPath = 'assets/GeoJson/Bhuvneshwar.geojson';
-          this.airportCoordinates = [20.26420972, 85.80248556];
-          break;
-        case 'Tuticorin':
-          airportGeoJSONPath = 'assets/GeoJson/Tuticorin.geojson';
-          this.airportCoordinates = [8.72229167, 78.02617500];
-          break;
-        case 'Bengaluru':
-          airportGeoJSONPath = 'assets/GeoJson/Banglore.geojson';
-          this.airportCoordinates = [13.19887167, 77.70547778];
-          break;
-        case 'Jeypore':
-          airportGeoJSONPath = 'assets/GeoJson/Jaypore.geojson';
-          this.airportCoordinates = [18.88055558, 82.55361111];
-          break;
-        case 'Jalgaon':
-          airportGeoJSONPath = 'assets/GeoJson/Jalgoan.geojson';
-          this.airportCoordinates = [20.96130556, 75.62459722];
-          break;
-        case 'Puducherry':
-          airportGeoJSONPath = 'assets/GeoJson/Puducherry.geojson';
-          this.airportCoordinates = [11.96731944, 79.81143056];
-          break;
-        case 'Raipur':
-          airportGeoJSONPath = 'assets/GeoJson/Raipur.geojson';
-          this.airportCoordinates = [21.18100056, 81.73859194];
-          break;
-        case 'Ranchi':
-          airportGeoJSONPath = 'assets/GeoJson/Ranchi.geojson';
-          this.airportCoordinates = [23.31416667, 85.32111111];
-          break;
-        case 'Surat':
-          airportGeoJSONPath = 'assets/GeoJson/Surat.geojson';
-          this.airportCoordinates = [21.11604444, 72.74181944];
-          break;
-        case 'Vijaywada':
-          airportGeoJSONPath = 'assets/GeoJson/Vijaywada.geojson';
-          this.airportCoordinates = [16.533597, 80.803283];
-          break;
-        case 'Birlamgram':
-          airportGeoJSONPath = 'assets/GeoJson/Birlamgram.geojson';
-          this.airportCoordinates = [23.45, 75.416667];
-          break;
-        case 'Ayodhya':
-          airportGeoJSONPath = 'assets/GeoJson/Ayodhya.geojson';
-          this.airportCoordinates = [26.7980, 82.2080];
-          break;
-        case 'Chitrakoot':
-          airportGeoJSONPath = 'assets/GeoJson/Chitrakoot.geojson';
-          this.airportCoordinates = [25.2320, 80.8250];
-          break;
+      const airportData: { [key: string]: { path: string, coords: [number, number] } } = {
+        'Puri': { path: 'assets/GeoJson/Puri.geojson', coords: [19.81, 85.83] },
+        'Mumbai': { path: 'assets/GeoJson/Mumbai.geojson', coords: [19.09155556, 72.86597222] },
+        'Coimbatore': { path: 'assets/GeoJson/Coimbatore.geojson', coords: [11.02691111, 77.04180278] },
+        'Ahemdabad': { path: 'assets/GeoJson/Ahemdabad.geojson', coords: [23.07119167, 72.62643333] },
+        'Akola': { path: 'assets/GeoJson/Akola.geojson', coords: [20.69851583, 77.05776056] },
+        'Chennai': { path: 'assets/GeoJson/Chennai.geojson', coords: [12.99510000, 80.17360278] },
+        'Delhi': { path: 'assets/GeoJson/Delhi.geojson', coords: [28.61, 77.20] },
+        'Guwahati': { path: 'assets/GeoJson/Guwahati.geojson', coords: [26.10502222, 91.58543889] },
+        'Hyderabad': { path: 'assets/GeoJson/Chennai.geojson', coords: [17.38, 78.48] },
+        'Jaipur': { path: 'assets/GeoJson/Jaipur.geojson', coords: [26.82417278, 75.80247833] },
+        'Nagpur': { path: 'assets/GeoJson/Nagpur.geojson', coords: [21.09172500, 79.04819722] },
+        'Thiruvananthapuram': { path: 'assets/GeoJson/Trivendrum.geojson', coords: [8.49319444, 76.90915833] },
+        'Vadodara': { path: 'assets/GeoJson/Vadodara.geojson', coords: [22.33004167, 73.21884444] },
+        'Varanasi': { path: 'assets/GeoJson/Varanasi.geojson', coords: [25.45121111, 82.85860556] },
+        'Agatti': { path: 'assets/GeoJson/Agatti.geojson', coords: [10.82421944, 72.17663611] },
+        'Aligarh': { path: 'assets/GeoJson/Aligarh.geojson', coords: [27.86130000, 78.14706944] },
+        'Ambikapur': { path: 'assets/GeoJson/Ambikapur.geojson', coords: [22.99345833, 83.19275222] },
+        'Amritsar': { path: 'assets/GeoJson/Amritsar.geojson', coords: [31.71059167, 74.80015556] },
+        'Aurangabad': { path: 'assets/GeoJson/Aurangabad.geojson', coords: [19.86439444, 75.39756111] },
+        'Azamgarh': { path: 'assets/GeoJson/Azamgarh.geojson', coords: [26.15734917, 83.11402361] },
+        'Balurghat': { path: 'assets/GeoJson/Balurghat.geojson', coords: [25.26355000, 88.79562750] },
+        'Baramati': { path: 'assets/GeoJson/Baramati.geojson', coords: [18.22662222, 74.58969722] },
+        'Belgaum': { path: 'assets/GeoJson/Belgaum.geojson', coords: [15.85840278, 74.61769167] },
+        'Berhampur': { path: 'assets/GeoJson/Berhampur.geojson', coords: [19.29156278, 84.87916861] },
+        'Bial': { path: 'assets/GeoJson/Bial.geojson', coords: [13.19887167, 77.70547778] },
+        'Bokaro': { path: 'assets/GeoJson/Bokaro.geojson', coords: [23.64352944, 86.14964472] },
+        'Cochin': { path: 'assets/GeoJson/Cochin.geojson', coords: [10.15, 76.40] },
+        'Deesa': { path: 'assets/GeoJson/Deesa.geojson', coords: [24.26777778, 72.20277778] },
+        'Diburgarh': { path: 'assets/GeoJson/Diburgarh.geojson', coords: [27.86130000, 78.14706944] },
+        'Diu': { path: 'assets/GeoJson/Diu.geojson', coords: [20.71379444, 70.92288056] },
+        'Durgapur': { path: 'assets/GeoJson/Aligarh.geojson', coords: [23.62444444, 87.24250000] },
+        'Gaya': { path: 'assets/GeoJson/Gaya.geojson', coords: [24.74803889, 84.94243611] },
+        'Hisar': { path: 'assets/GeoJson/Hisar.geojson', coords: [29.15, 75.73] },
+        'Hubli': { path: 'assets/GeoJson/Hubli.geojson', coords: [15.36183889, 75.08436667] },
+        'Imphal': { path: 'assets/GeoJson/Imphal.geojson', coords: [24.76431667, 93.89963889] },
+        'Jabalpur': { path: 'assets/GeoJson/Aligarh.geojson', coords: [23.18337222, 80.06044444] },
+        'Jewer': { path: 'assets/GeoJson/Jewer.geojson', coords: [28.17561111, 77.60624167] },
+        'Jharsaugada': { path: 'assets/GeoJson/Jharsaugada.geojson', coords: [21.91481944, 84.04869167] },
+        'Jogbani': { path: 'assets/GeoJson/Jogbani.geojson', coords: [26.29618056, 87.28654722] },
+        'Kadapa': { path: 'assets/GeoJson/Kadapa.geojson', coords: [14.51304722, 78.77219167] },
+        'Kandla': { path: 'assets/GeoJson/Jewer.geojson', coords: [23.11220000, 70.10056667] },
+        'Kangra': { path: 'assets/GeoJson/Kangra.geojson', coords: [32.16473611, 76.26215556] },
+        'Kannur': { path: 'assets/GeoJson/Kannur.geojson', coords: [11.91573056, 75.54572222] },
+        'Keshod': { path: 'assets/GeoJson/Keshod.geojson', coords: [21.31498889, 70.26913889] },
+        'Khajuraho': { path: 'assets/GeoJson/Khajuraho.geojson', coords: [24.81983056, 79.91857500] },
+        'Kishangarh': { path: 'assets/GeoJson/Kishangarh.geojson', coords: [26.60125, 74.81415] },
+        'Kullu': { path: 'assets/GeoJson/Kullu.geojson', coords: [31.87681389, 77.15525833] },
+        'Kurnool': { path: 'assets/GeoJson/Kurnool.geojson', coords: [15.71475556, 78.16298611] },
+        'Kushinagar': { path: 'assets/GeoJson/Kushinagar.geojson', coords: [26.77277778, 83.89527778] },
+        'Lalitpur': { path: 'assets/GeoJson/Lalitpur.geojson', coords: [24.71647083, 78.41612444] },
+        'Lilabari': { path: 'assets/GeoJson/Lilabari.geojson', coords: [27.29122778, 94.09352778] },
+        'Lucknow': { path: 'assets/GeoJson/Lucknow.geojson', coords: [26.76185278, 80.88342778] },
+        'Ludhiana': { path: 'assets/GeoJson/Ludiana.geojson', coords: [30.90, 75.85] },
+        'Mangalore': { path: 'assets/GeoJson/Manglore.geojson', coords: [12.96139611, 74.89004722] },
+        'Meerut': { path: 'assets/GeoJson/Meerut.geojson', coords: [28.58744583, 77.70449167] },
+        'Muzaffarpur': { path: 'assets/GeoJson/Muzaffarpur.geojson', coords: [26.12, 85.38] },
+        'Mysore': { path: 'assets/GeoJson/Mysore.geojson', coords: [12.30, 76.65] },
+        'Nanded': { path: 'assets/GeoJson/Nanded.geojson', coords: [19.18103861, 77.32254722] },
+        'Pakyong': { path: 'assets/GeoJson/Pakyong.geojson', coords: [27.13, 88.61] },
+        'Pantnagar': { path: 'assets/GeoJson/Patanagar.geojson', coords: [29.03214722, 79.47246944] },
+        'Patna': { path: 'assets/GeoJson/Patna.geojson', coords: [25.59361111, 85.09183333] },
+        'Porbandar': { path: 'assets/GeoJson/Porbandar.geojson', coords: [21.65034583, 69.65880028] },
+        'Rajamundary': { path: 'assets/GeoJson/Rajamundary.geojson', coords: [17.10944444, 81.81944444] },
+        'Rourkela': { path: 'assets/GeoJson/Rourkela.geojson', coords: [22.25623889, 84.81460833] },
+        'Shirdi': { path: 'assets/GeoJson/Shirdi.geojson', coords: [19.69083333, 74.37166667] },
+        'Sholapur': { path: 'assets/GeoJson/Sholapur.geojson', coords: [17.62765278, 75.93403889] },
+        'Tiruchirapalli': { path: 'assets/GeoJson/Tiruchirapalli.geojson', coords: [10.765, 78.710] },
+        'Tirupati': { path: 'assets/GeoJson/Tirupati.geojson', coords: [13.63296389, 79.54190833] },
+        'Udaipur': { path: 'assets/GeoJson/Udaipur.geojson', coords: [20.09765028, 83.18355250] },
+        'Utkela': { path: 'assets/GeoJson/Utkela.geojson', coords: [20.459722, 83.818333] },
+        'Vellore': { path: 'assets/GeoJson/Vellore.geojson', coords: [12.90810639, 79.06714361] },
+        'Warangal': { path: 'assets/GeoJson/Warangal.geojson', coords: [17.91703361, 79.59933194] },
+        'Calicut': { path: 'assets/GeoJson/Calicut.geojson', coords: [11.13785000, 75.95057222] },
+        'Agartala': { path: 'assets/GeoJson/Agartala.geojson', coords: [23.89055556, 91.23916667] },
+        'Dimapur': { path: 'assets/GeoJson/Dimapur.geojson', coords: [25.88345756, 93.77135750] },
+        'Kota': { path: 'assets/GeoJson/Kota.geojson', coords: [25.16008333, 75.84783333] },
+        'Madurai': { path: 'assets/GeoJson/Madurai.geojson', coords: [9.83500000, 78.08861111] },
+        'Kolhapur': { path: 'assets/GeoJson/Kolhapur.geojson', coords: [16.66637222, 74.29048056] },
+        'Kolkata': { path: 'assets/GeoJson/Kolkata.geojson', coords: [22.65473944, 88.44672222] },
+        'Bhopal': { path: 'assets/GeoJson/Bhopal.geojson', coords: [23.28691944, 77.33696389] },
+        'Mopa': { path: 'assets/GeoJson/Mopa.geojson', coords: [15.74249889, 73.86701028] },
+        'Bhavnagar': { path: 'assets/GeoJson/Bhavnagar.geojson', coords: [21.75425139, 72.19052528] },
+        'Dehradun': { path: 'assets/GeoJson/Dehradun.geojson', coords: [30.19063056, 78.18222222] },
+        'Hirsar': { path: 'assets/GeoJson/Hirsar.geojson', coords: [29.1833, 75.7167] },
+        'Jamshedpur': { path: 'assets/GeoJson/Jamshedpur.geojson', coords: [22.81455417, 86.16901472] },
+        'Deoghar': { path: 'assets/GeoJson/Deoghar.geojson', coords: [24.44637500, 86.71666667] },
+        'Donakonda': { path: 'assets/GeoJson/Donakonda.geojson', coords: [15.82472167, 79.48233389] },
+        'Shimla': { path: 'assets/GeoJson/Shimla.geojson', coords: [31.08158083, 77.06767694] },
+        'Cooch Behar': { path: 'assets/GeoJson/CoochBehar.geojson', coords: [26.32965556, 89.46711389] },
+        'Bhuvneshwar': { path: 'assets/GeoJson/Bhuvneshwar.geojson', coords: [20.26420972, 85.80248556] },
+        'Tuticorin': { path: 'assets/GeoJson/Tuticorin.geojson', coords: [8.72229167, 78.02617500] },
+        'Bengaluru': { path: 'assets/GeoJson/Banglore.geojson', coords: [13.19887167, 77.70547778] },
+        'Jeypore': { path: 'assets/GeoJson/Jaypore.geojson', coords: [18.88055558, 82.55361111] },
+        'Jalgaon': { path: 'assets/GeoJson/Jalgaon.geojson', coords: [20.96130556, 75.62459722] },
+        'Puducherry': { path: 'assets/GeoJson/Puducherry.geojson', coords: [11.96731944, 79.81143056] },
+        'Raipur': { path: 'assets/GeoJson/Raipur.geojson', coords: [21.18100056, 81.73859194] },
+        'Ranchi': { path: 'assets/GeoJson/Ranchi.geojson', coords: [23.31416667, 85.32111111] },
+        'Surat': { path: 'assets/GeoJson/Surat.geojson', coords: [21.11604444, 72.74181944] },
+        'Vijaywada': { path: 'assets/GeoJson/Vijaywada.geojson', coords: [16.533597, 80.803283] },
+        'Birlamgram': { path: 'assets/GeoJson/Birlamgram.geojson', coords: [23.45, 75.416667] },
+        'Ayodhya': { path: 'assets/GeoJson/Ayodhya.geojson', coords: [26.7980, 82.2080] },
+        'Chitrakoot': { path: 'assets/GeoJson/Chitrakoot.geojson', coords: [25.2320, 80.8250] },
+        'Ghaziabad': { path: 'assets/GeoJson/Ghaziabad.geojson', coords: [28.707778, 77.358333] },
+        'Ambala': { path: 'assets/GeoJson/Ambala.geojson', coords: [30.370833, 76.817778] },
+        'Goa': { path: 'assets/GeoJson/Goa.geojson', coords: [15.3725, 73.831389] },
+        'Pune': { path: 'assets/GeoJson/Pune.geojson', coords: [18.582222, 73.919722] },
+        'Cimbatore': { path: 'assets/GeoJson/Cimbatore.geojson', coords: [11.013611, 77.159722] },
+        'Arakkonnam': { path: 'assets/GeoJson/Arakkonnam.geojson', coords: [13.071111, 79.691111] },
+        'Jodhpur': { path: 'assets/GeoJson/Jodhpur.geojson', coords: [26.257222, 73.051667] },
+        'Leh': { path: 'assets/GeoJson/Leh.geojson', coords: [34.135833, 77.545278] },
+        'Pathankot': { path: 'assets/GeoJson/Pathankot.geojson', coords: [32.233611, 75.634444] },
+        'Nicobar islands': { path: 'assets/GeoJson/NicobarIslands.geojson', coords: [9.1525, 92.819722] },
+        'Tezpur': { path: 'assets/GeoJson/Tezpur.geojson', coords: [26.712222, 92.787222] },
+        'Thanjavur': { path: 'assets/GeoJson/Thanjavur.geojson', coords: [10.722222, 79.101389] },
+        'Agra': { path: 'assets/GeoJson/Agra.geojson', coords: [27.161832, 77.970727] },
+        'Kochi': { path: 'assets/GeoJson/Kochi.geojson', coords: [9.940000, 76.275000] },
+        'Banglore': { path: 'assets/GeoJson/Banglre.geojson', coords: [13.135833, 77.607500] },
+        'Aizawl': { path: 'assets/GeoJson/Aizawl_Lengpui.geojson', coords: [23.2551083, 92.6203583] },
+        'Shillong': { path: 'assets/GeoJson/Shillong.geojson', coords: [25.70361111, 91.97861111] },
+        'Bilaspur': { path: 'assets/GeoJson/Bilaspur.geojson', coords: [21.98833333, 82.11111111] },
+        'Indore': { path: 'assets/GeoJson/Indore.geojson', coords: [23.72166667, 75.80083333] },
+        'Itanagar': { path: 'assets/GeoJson/Itanagar.geojson', coords: [26.9718, 93.643] },
+        'Gondia': { path: 'assets/GeoJson/Gondia.geojson', coords: [21.52555556, 80.28916667] },
+        'Nashik': { path: 'assets/GeoJson/Nashik.geojson', coords: [20.1194444, 73.9136111] },
+        'Jagdalpur': { path: 'assets/GeoJson/Jagdalpur.geojson', coords: [19.07444444, 82.03694444] },
+        'Vidyanagar': { path: 'assets/GeoJson/Vidyanagar.geojson', coords: [15.175, 73.6341] },
+        'Kalaburagi': { path: 'assets/GeoJson/Kalaburagi.geojson', coords: [17.30777778, 76.95805556] },
+        'Moradabad': { path: 'assets/GeoJson/Moradabad.geojson', coords: [28.81944444, 78.92333333] },
+        'Pithoragarh': { path: 'assets/GeoJson/Pithoragarh.geojson', coords: [29.5924583, 80.241775] },
+        'Rupsi': { path: 'assets/GeoJson/Rupsi.geojson', coords: [26.14111111, 89.90666667] },
+        'Salem': { path: 'assets/GeoJson/Salem.geojson', coords: [11.7819444, 78.0644444] },
+        'Shivamogga': { path: 'assets/GeoJson/Shivamogga.geojson', coords: [13.85472222, 75.61055556] },
+        'Sindhudurg': { path: 'assets/GeoJson/Sindhudurg.geojson', coords: [16.0, 73.5333333] },
+        'Tezu': { path: 'assets/GeoJson/Tezu.geojson', coords: [27.9422, 96.1339] },
+        'Angul': { path: 'assets/GeoJson/Angul.geojson', coords: [20.91055556, 85.03527778] },
+        'Koppal': { path: 'assets/GeoJson/Koppal.geojson', coords: [15.3593111, 76.2192] },
+        'Beas': { path: 'assets/GeoJson/Beas.geojson', coords: [31.56055556, 75.34111111] },
+        'Hosur': { path: 'assets/GeoJson/Hosur.geojson', coords: [12.66111111, 77.76694444] },
+        'Raigarh': { path: 'assets/GeoJson/Raigarh.geojson', coords: [21.82388889, 83.36027778] },
+        'Puttaparthi': { path: 'assets/GeoJson/Puttaparthi.geojson', coords: [14.14916667, 77.79111111] },
+      };
  
+      const airportInfo = airportData[selectedAirportCITY];
+      if (airportInfo) {
+        this.airportCoordinates = airportInfo.coords;
+        map.setView(this.airportCoordinates, zoomLevel);
  
-        case 'Ghaziabad':
-          airportGeoJSONPath = 'assets/GeoJson/Ghaziabad.geojson';
-          this.airportCoordinates = [28.707778, 77.358333];
-          break;
-        case 'Ambala':
-          airportGeoJSONPath = 'assets/GeoJson/Ambala.geojson';
-          this.airportCoordinates = [30.370833, 76.817778];
-          break;
-        case 'Goa':
-          airportGeoJSONPath = 'assets/GeoJson/Goa.geojson';
-          this.airportCoordinates = [15.3725, 73.831389];
-          break;
-        case 'Pune':
-          airportGeoJSONPath = 'assets/GeoJson/Pune.geojson';
-          this.airportCoordinates = [18.582222, 73.919722];
-          break;
-        case 'Cimbatore':
-          airportGeoJSONPath = 'assets/GeoJson/Cimbatore.geojson';
-          this.airportCoordinates = [11.013611, 77.159722];
-          break;
-        case 'Arakkonnam':
-          airportGeoJSONPath = 'assets/GeoJson/Arakkonnam.geojson';
-          this.airportCoordinates = [13.071111, 79.691111];
-          break;
-        case 'Jodhpur':
-          airportGeoJSONPath = 'assets/GeoJson/Jodhpur.geojson';
-          this.airportCoordinates = [26.257222, 73.051667];
-          break;
-        case 'Leh':
-          airportGeoJSONPath = 'assets/GeoJson/Leh.geojson';
-          this.airportCoordinates = [34.135833, 77.545278];
-          break;
-        case 'Pathankot':
-          airportGeoJSONPath = 'assets/GeoJson/Pathankot.geojson';
-          this.airportCoordinates = [32.233611, 75.634444];
-          break;
-        case 'Nicobar islands':
-          airportGeoJSONPath = 'assets/GeoJson/NicobarIslands.geojson';
-          this.airportCoordinates = [9.1525, 92.819722];
-          break;
-        case 'Tezpur':
-          airportGeoJSONPath = 'assets/GeoJson/Tezpur.geojson';
-          this.airportCoordinates = [26.712222, 92.787222];
-          break;
-        case 'Thanjavur':
-          airportGeoJSONPath = 'assets/GeoJson/Thanjavur.geojson';
-          this.airportCoordinates = [10.722222, 79.101389];
-          break;
-        case 'Agra':
-          airportGeoJSONPath = 'assets/GeoJson/Agra.geojson';
-          this.airportCoordinates = [27.161832, 77.970727];
-          break;
-        case 'Kochi':
-          airportGeoJSONPath = 'assets/GeoJson/Kochi.geojson';
-          this.airportCoordinates = [9.940000, 76.275000];
-          break;
-        case 'Banglore':
-          airportGeoJSONPath = 'assets/GeoJson/Banglre.geojson';
-          this.airportCoordinates = [13.135833, 77.607500];
-          break;
-        case 'Aizawl':
-          airportGeoJSONPath = 'assets/GeoJson/Aizawl_Lengpui.geojson';
-          this.airportCoordinates = [23.2551083, 92.6203583
-          ];
-          break;
-        case 'Shillong':
-          airportGeoJSONPath = 'assets/GeoJson/Shillong.geojson';
-          this.airportCoordinates = [25.70361111, 91.97861111];
-          break;
-        case 'Bilaspur':
-          airportGeoJSONPath = 'assets/GeoJson/Bilaspur.geojson';
-          this.airportCoordinates = [21.98833333, 82.11111111];
-          break;
-        case 'Indore':
-          airportGeoJSONPath = 'assets/GeoJson/Indore.geojson';
-          this.airportCoordinates = [23.72166667, 75.80083333];
-          break;
-        case 'Itanagar':
-          airportGeoJSONPath = 'assets/GeoJson/Itanagar.geojson';
-          this.airportCoordinates = [26.9718, 93.643];
-          break;
-        case 'Gondia':
-          airportGeoJSONPath = 'assets/GeoJson/Gondia.geojson';
-          this.airportCoordinates = [21.52555556, 80.28916667];
-          break;
-        case 'Nashik':
-          airportGeoJSONPath = 'assets/GeoJson/Nashik.geojson';
-          this.airportCoordinates = [20.1194444, 73.9136111];
-          break;
-        case 'Jagdalpur':
-          airportGeoJSONPath = 'assets/GeoJson/Jagdalpur.geojson';
-          this.airportCoordinates = [19.07444444, 82.03694444];
-          break;
-        case 'Vidyanagar':
-          airportGeoJSONPath = 'assets/GeoJson/Vidyanagar.geojson';
-          this.airportCoordinates = [15.175, 73.6341];
-          break;
-        case 'Kalaburagi':
-          airportGeoJSONPath = 'assets/GeoJson/Kalaburagi.geojson';
-          this.airportCoordinates = [17.30777778, 76.95805556];
-          break;
-        case 'Moradabad':
-          airportGeoJSONPath = 'assets/GeoJson/Moradabad.geojson';
-          this.airportCoordinates = [28.81944444, 78.92333333];
-          break;
-        case 'Pithoragarh':
-          airportGeoJSONPath = 'assets/GeoJson/Pithoragarh.geojson';
-          this.airportCoordinates = [29.5924583, 80.241775];
-          break;
-        case 'Rupsi':
-          airportGeoJSONPath = 'assets/GeoJson/Rupsi.geojson';
-          this.airportCoordinates = [26.14111111, 89.90666667];
-          break;
-        case 'Salem':
-          airportGeoJSONPath = 'assets/GeoJson/Salem.geojson';
-          this.airportCoordinates = [11.7819444, 78.0644444];
-          break;
-        case 'Shivamogga':
-          airportGeoJSONPath = 'assets/GeoJson/Shivamogga.geojson';
-          this.airportCoordinates = [13.85472222, 75.61055556];
-          break;
-        case 'Sindhudurg':
-          airportGeoJSONPath = 'assets/GeoJson/Sindhudurg.geojson';
-          this.airportCoordinates = [16.0, 73.5333333];
-          break;
-        case 'Tezu':
-          airportGeoJSONPath = 'assets/GeoJson/Tezu.geojson';
-          this.airportCoordinates = [27.9422, 96.1339];
-          break;
-        case 'Angul':
-          airportGeoJSONPath = 'assets/GeoJson/Angul.geojson';
-          this.airportCoordinates = [20.91055556, 85.03527778];
-          break;
-        case 'Koppal':
-          airportGeoJSONPath = 'assets/GeoJson/Koppal.geojson';
-          this.airportCoordinates = [15.3593111, 76.2192];
-          break;
-        case 'Beas':
-          airportGeoJSONPath = 'assets/GeoJson/Beas.geojson';
-          this.airportCoordinates = [31.56055556, 75.34111111];
-          break;
-        case 'Hosur':
-          airportGeoJSONPath = 'assets/GeoJson/Hosur.geojson';
-          this.airportCoordinates = [12.66111111, 77.76694444];
-          break;
-        case 'Raigarh':
-          airportGeoJSONPath = 'assets/GeoJson/Raigarh.geojson';
-          this.airportCoordinates = [21.82388889, 83.36027778];
-          break;
-        case 'Puttaparthi':
-          airportGeoJSONPath = 'assets/GeoJson/Puttaparthi.geojson';
-          this.airportCoordinates = [14.14916667, 77.79111111];
-          break;
-        default:
-          console.error("Invalid airport city name.");
-          return;
-      }
-      fetch(airportGeoJSONPath)
-        .then(response => response.json())
-        .then(geojsonData => {
-          const features = geojsonData.features;
-          const style = (feature: any) => {
-            const color = feature.properties.Color;
-            return { fillColor: color, weight: 2 };
-          };
-          const geojsonLayer = L.geoJSON(features, { style: style });
-          geojsonLayer.addTo(map);
-          this.geojsonLayer = geojsonLayer;
-          map.fitBounds(geojsonLayer.getBounds());
-          let customIcon = L.icon({
-            iconUrl: 'assets/marker-airport.png',
-            shadowUrl: 'https://opentopomap.org/leaflet/images/marker-shadow.png',
-            iconSize: [40, 41],
-            shadowSize: [40, 41],
-            iconAnchor: [12, 40],
-          });
-          if (this.marker2) {
-            map.removeLayer(this.marker2);
-            this.marker2 = null;
-          }
-          this.marker2 = L.marker(this.airportCoordinates, { icon: customIcon }).addTo(map);
-          const popupContent = `ARP:
+        // Load the GeoJSON file using the path
+        fetch(airportInfo.path)
+          .then(response => response.json())
+          .then(geojsonData => {
+            const features = geojsonData.features;
+            const style = (feature: any) => {
+              const color = feature.properties.Color;
+              return { fillColor: color, weight: 2 };
+            };
+            const geojsonLayer = L.geoJSON(features, { style: style });
+            geojsonLayer.addTo(map);
+            this.geojsonLayer = geojsonLayer;
+            map.fitBounds(geojsonLayer.getBounds());
+            let customIcon = L.icon({
+              iconUrl: 'assets/marker-airport.png',
+              shadowUrl: 'https://opentopomap.org/leaflet/images/marker-shadow.png',
+              iconSize: [40, 41],
+              shadowSize: [40, 41],
+              iconAnchor: [12, 40],
+            });
+            if (this.marker2) {
+              map.removeLayer(this.marker2);
+              this.marker2 = null;
+            }
+            this.marker2 = L.marker(this.airportCoordinates, { icon: customIcon }).addTo(map);
+            const popupContent = `ARP:
             <p>${selectedAirportCITY} Airport</p><br>
             Latitude: ${this.airportCoordinates[0].toFixed(2)}
             Longitude: ${this.airportCoordinates[1].toFixed(2)}`;
-          this.marker2.bindPopup(popupContent).openPopup();
-          if (this.marker) {
-            map.removeLayer(this.marker);
-            this.marker = null;
-          }
-          this.marker = L.marker([this.lat, this.long]).addTo(map);
-        })
-        .catch(error => {
-         
-       
-        });
+            this.marker2.bindPopup(popupContent).openPopup();
+            if (this.marker) {
+              map.removeLayer(this.marker);
+              this.marker = null;
+            }
+            this.marker = L.marker([this.lat, this.long]).addTo(map);
+          })
+          .catch(error => {
+ 
+ 
+          });
+      }
     }
   }
  
  
-updateNearestAirportData() {
+ updateNearestAirportData() {
     const nearestAirport = this.findNearestAirport(this.lat, this.long, 30);
     const selectionMode = this.TopElevationForm.get('selectionMode')?.value;
  
@@ -1143,7 +739,7 @@ updateNearestAirportData() {
         }
       })
       .catch(error => {
-       
+ 
         console.error('Error loading GeoJSON file:', error);
       });
   }
@@ -1224,7 +820,6 @@ updateNearestAirportData() {
       });
   }
  
- 
   navigateToContact() {
     this.router.navigate(['/request-Service']);
   }
@@ -1240,7 +835,6 @@ updateNearestAirportData() {
     }
     return null;
   }
- 
  
   captureScreenshot(): Promise<string | null> {
     return new Promise((resolve, reject) => {
@@ -1291,8 +885,8 @@ updateNearestAirportData() {
  
   handlePayment() {
     const RozarpayOptions = {
-      // key: 'rzp_test_IScA4BP8ntHVNp',
-      key: 'rzp_live_7iwvKtQ79rijv2',
+      key: 'rzp_test_IScA4BP8ntHVNp',
+      // key: 'rzp_live_7iwvKtQ79rijv2',
       amount: 50 * 100,
       currency: 'INR',
       name: 'Cognitive Navigation Pvt. Ltd',
@@ -1493,6 +1087,7 @@ updateNearestAirportData() {
   ];
  
   getElevationForCity(city: string): number {
+ 
     const cityElevationMap: { [key: string]: number } = {
       'Puri': this.feetToMeters(0),
       'Mumbai': this.feetToMeters(40),
@@ -1657,35 +1252,28 @@ updateNearestAirportData() {
   }
  
   onElevationOptionChange() {
-    const elevationOptionControl = this.TopElevationForm.get('elevationOption');
-    const city = this.city; // Assuming 'city' is available in your class context
-    let defaultElevation = null;
+    const elevationOption = this.TopElevationForm.get('elevationOption')?.value;
+    const selectedCity = this.TopElevationForm.get('CITY')?.value;
  
-    if (elevationOptionControl && elevationOptionControl.value === 'unknown') {
-      // Get elevation for the selected city
-      const elevation = this.getElevationForCity(city);
- 
-      // Convert the elevation from feet to meters
-      defaultElevation = this.feetToMeters(elevation);
- 
-      // Update the form with the default elevation
+    if (elevationOption === 'default' && selectedCity) {
+      const elevation = this.getElevationForCity(selectedCity);
+      const defaultElevation = this.feetToMeters(elevation);
       this.TopElevationForm.patchValue({ Site_Elevation: defaultElevation });
  
-      // Show an alert or notification to the user
-      this.showAlert = true;
-      this.toastr.info("Users shall enter site elevation value received from WGS-84 survey report. Permissible height will be calculated based on site elevation entered by user. In absence of site elevation value from user, ARP (Airport) elevation value will be used as default.");
-    } else {
-      // Hide the alert if the value is not 'unknown'
-      this.showAlert = false;
+      this.toastr.info(`Elevation updated based on the selected city (${selectedCity}).`);
+    } else if (elevationOption === 'manual') {
+      // Optionally, you can clear or set a default value
+      this.TopElevationForm.patchValue({ Site_Elevation: '' });
     }
   }
  
+ 
   async createNocas(subscription_id: string = "") {
     if (this.TopElevationForm.valid) {
-     
-        const screenshotPath = await this.captureScreenshot();
-        const lat = parseFloat(this.TopElevationForm.value.Latitude); const lng = parseFloat(this.TopElevationForm.value.Longitude); const distance = this.calculateDistance(this.lat, this.long, this.airportCoordinates[0], this.airportCoordinates[1]); const clickedFeature = this.geojsonLayer.getLayers().find((layer: any) => { return layer.getBounds().contains([lat, lng]); }); let elevation = 0; let permissibleHeight = 0; if (clickedFeature) { const properties = clickedFeature.feature.properties; elevation = parseFloat(properties.name); permissibleHeight = elevation - parseFloat(this.TopElevationForm.get('Site_Elevation').value); } const requestBody = { user_id: this.apiservice.userData.id, distance: this.insideMapData?.newDistance || (distance.toFixed(2)), permissible_elevation: this.insideMapData?.elevation + "" || elevation + "", permissible_height: this.insideMapData?.permissibleHeight || (permissibleHeight < 0 ? '-' : Math.abs(permissibleHeight).toFixed(2)), city: this.TopElevationForm.value.CITY, latitude: this.insideMapData?.latitudeDMS || this.latitudeDMS, longitude: this.insideMapData?.longitudeDMS || this.longitudeDMS, airport_name: this.selectedAirportName, site_elevation: this.TopElevationForm.value.Site_Elevation, snapshot: screenshotPath, subscription_id: subscription_id, }; this.apiservice.createNocas(requestBody).subscribe((resultData: any) => { if (resultData.isSubscribed || resultData.freeTrialCount > 0 || resultData.isOneTimeSubscription) { this.isSubscribed = true; } else { this.isSubscribed = false; } }, (error: any) => { alert("Session Expired. Please Login again."); localStorage.removeItem('userData'); localStorage.removeItem('token'); this.router.navigate(['UsersLogin']); });
-      }  else { alert("Please fill out all required fields in the form."); }
+ 
+      const screenshotPath = await this.captureScreenshot();
+      const lat = parseFloat(this.TopElevationForm.value.Latitude); const lng = parseFloat(this.TopElevationForm.value.Longitude); const distance = this.calculateDistance(this.lat, this.long, this.airportCoordinates[0], this.airportCoordinates[1]); const clickedFeature = this.geojsonLayer.getLayers().find((layer: any) => { return layer.getBounds().contains([lat, lng]); }); let elevation = 0; let permissibleHeight = 0; if (clickedFeature) { const properties = clickedFeature.feature.properties; elevation = parseFloat(properties.name); permissibleHeight = elevation - parseFloat(this.TopElevationForm.get('Site_Elevation').value); } const requestBody = { user_id: this.apiservice.userData.id, distance: this.insideMapData?.newDistance || (distance.toFixed(2)), permissible_elevation: this.insideMapData?.elevation + "" || elevation + "", permissible_height: this.insideMapData?.permissibleHeight || (permissibleHeight < 0 ? '-' : Math.abs(permissibleHeight).toFixed(2)), city: this.TopElevationForm.value.CITY, latitude: this.insideMapData?.latitudeDMS || this.latitudeDMS, longitude: this.insideMapData?.longitudeDMS || this.longitudeDMS, airport_name: this.selectedAirportName, site_elevation: this.TopElevationForm.value.Site_Elevation, snapshot: screenshotPath, subscription_id: subscription_id, }; this.apiservice.createNocas(requestBody).subscribe((resultData: any) => { if (resultData.isSubscribed || resultData.freeTrialCount > 0 || resultData.isOneTimeSubscription) { this.isSubscribed = true; } else { this.isSubscribed = false; } }, (error: any) => { alert("Session Expired. Please Login again."); localStorage.removeItem('userData'); localStorage.removeItem('token'); this.router.navigate(['UsersLogin']); });
+    } else { alert("Please fill out all required fields in the form."); }
   }
  
   displayMapData(lat: number, lng: number, airportCoordinates: [number, number]) {
@@ -1696,7 +1284,7 @@ updateNearestAirportData() {
  
     if (clickedFeature) {
       const properties = clickedFeature.feature.properties;
-      console.log(properties)
+      (properties)
       const elevation = properties.name;
       const permissibleHeight = parseFloat(properties.name) - parseFloat(this.TopElevationForm.get('Site_Elevation').value);
  
@@ -1712,8 +1300,6 @@ updateNearestAirportData() {
         longitudeDMS: this.longitudeDMS,
         newDistance: distance.toFixed(2)
       };
-      console.log("Inside Map Data Updated:", this.insideMapData);
- 
       // Display the insideMapData modal
       this.showModal('insideMapData');
     } else {
@@ -1724,7 +1310,7 @@ updateNearestAirportData() {
   updateSelectedAirport(airportCity: string, airportName: string, distance: number) {
     this.airportName = airportName;
     this.distance = distance;
-    console.log(this.distance, "jwse")
+    (this.distance, "jwse")
     const airport = this.airportCoordinatesList.find(airport => airport[3] === airportName);
     const selectionMode = this.TopElevationForm.get('selectionMode')?.value;
     if (selectionMode === 'manual') {
@@ -1946,6 +1532,15 @@ updateNearestAirportData() {
   }
  
   applyForNOC() {
+    Swal.fire({
+      title: 'Success!',
+      text: `We have noted your request. Our team will contact you within 1 working day.`,
+      icon: 'success',
+      confirmButtonText: 'OK'
+    });
+ 
+ 
+ 
     // Automatically set the service2 checkbox to true
     this.requestForm.patchValue({
       service2: true
@@ -1965,7 +1560,7 @@ updateNearestAirportData() {
  
       this.apiservice.createRequest(requestData).subscribe(
         (result: any) => {
-          this.toastr.success("Request created successfully");
+          // this.toastr.success("Request created successfully");
           // Optionally, navigate to another page or perform additional actions here
         },
         (error) => {
@@ -1976,7 +1571,7 @@ updateNearestAirportData() {
     } else {
       this.toastr.warning('Please select a service.');
     }
-  }  
+  }
  
  
 }

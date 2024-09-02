@@ -9,7 +9,7 @@ import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
- 
+import Swal from 'sweetalert2';
  
  
  
@@ -59,10 +59,10 @@ export class UsersHomeComponent implements OnInit {
   filterpermissibleDetails: any[] = [];
   filterserviceDetails: any[] = [];
   serviceNames: ServiceNames = {
-    'service1': 'WGS-84 Survey',
+    'service1': 'Site Survey (WGS-84)',
     'service2': 'NOC Application & Associated Service',
-    'service3': 'Pre-aeronautical Study',
-    'service4': 'Aeronautical Study / Shielding Benefits Study',
+    'service3': 'Pre-aeronautical Study Assessment',
+    'service4': 'Aeronautical Study Assessment Support',
     'service5': 'Documents & Process Management',
     'service6': 'Session with SME'
   };
@@ -98,21 +98,6 @@ export class UsersHomeComponent implements OnInit {
  
  
  
-  // ngAfterViewInit() {
-  //   this.subscriptionDataSource.paginator = this.subscriptionPaginator;
-  //   this.subscriptionDataSource.sort = this.subscriptionSort;
- 
- 
- 
-  //   this.permissibleDataSource.paginator = this.permissiblePaginator;
-  //   this.permissibleDataSource.sort = this.permissibleSort;
- 
- 
-  //   this.serviceDataSource.paginator = this.servicePaginator;
-  //    this.serviceDataSource.sort = this.serviceSort;
- 
- 
-  // }
  
   bufferToBase64(buffer: any) {
     return btoa(new Uint8Array(buffer).reduce((data, byte) => data + String.fromCharCode(byte), ''));
@@ -128,6 +113,7 @@ export class UsersHomeComponent implements OnInit {
     const user_id = this.apiservice.userData.id;
     this.apiservice.getSubscriptionDetails(user_id).subscribe(
         response => {
+          response.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
           let priceCalculation = '';
           response.forEach((subscription, index) => {
             subscription.expiry_date = this.datePipe.transform(subscription.expiry_date, 'dd/MM/yyyy');
@@ -165,19 +151,13 @@ export class UsersHomeComponent implements OnInit {
  
     this.apiservice.getServiceDetails(user_id).subscribe(
       response => {
-        // Parse and map the services data, including createdAt
+        response.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
         this.serviceDetails = response.map(service => ({
           ...service,
-          services: JSON.parse(service.services), // Ensure services is parsed as an object
-          date: service.createdAt // Include the createdAt field in your mapping
+          services: JSON.parse(service.services),
+          date: service.createdAt
         }));
- 
-        console.log('Parsed Services:', this.serviceDetails);
- 
-        // Apply filtering logic
         this.filterServices();
- 
-        // Update MatTableDataSource
         this.updateTableData();
       },
       error => {
@@ -195,7 +175,6 @@ export class UsersHomeComponent implements OnInit {
       activeServiceNames: this.getActiveServiceNames(service.services)
     }));
  
-    console.log('Filtered Services:', this.filterserviceDetails);
   }
  
   getActiveServiceNames(services: { [key: string]: boolean }): string[] {
@@ -353,7 +332,14 @@ export class UsersHomeComponent implements OnInit {
  
       this.apiservice.createRequest(requestData).subscribe(
         (result: any) => {
-          this.toastr.success("Request created successfully");
+ 
+           Swal.fire({
+      title: 'Success!',
+      text: `We have noted your request. Our team will contact you within 1 working day.`,
+      icon: 'success',
+      confirmButtonText: 'OK'
+    });
+   
           // Optionally, navigate to another page or perform additional actions here
         },
         (error) => {

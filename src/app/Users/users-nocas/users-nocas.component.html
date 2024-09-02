@@ -3,7 +3,7 @@
     <div class="col-lg-2">
       <form [formGroup]="TopElevationForm" autocomplete="on" novalidate>
         <div class="mb-2">
-          <label class="form-label">Select Site Location</label>
+          <label class="form-label"><b>Select Site Location</b></label>
           <div class="form-check">
             <input class="form-check-input" type="radio" formControlName="location" value="currentLocation"
               id="currentLocation" (click)="getLocation()">
@@ -45,7 +45,7 @@
           </div>
         </div>
         <div class="mb-2">
-          <label class="form-label">Select Nearest Airport</label>
+          <label class="form-label"><b>Select Nearest Airport</b></label>
           <div class="form-check">
             <input class="form-check-input" type="radio" formControlName="selectionMode" value="default" id="autoSelect"
               (change)="updateNearestAirportData()">
@@ -87,22 +87,48 @@
           </div>
         </div>
         <div class="mb-2">
-          <label class="form-label">Select Site Elevation (meter)</label>
+          <label class="form-label"><b>Select Site Elevation (meter)</b></label>
           <div class="form-check">
-            <input class="form-check-input" type="radio" formControlName="elevationOption" value="unknown"
-              id="autoSelectElevation" (change)="onElevationOptionChange()">
+            <input
+              class="form-check-input"
+              type="radio"
+              formControlName="elevationOption"
+              value="default"
+              id="autoSelectElevation"
+              (change)="onElevationOptionChange()">
             <label class="form-check-label" for="autoSelectElevation">
               Auto-Select (Default Airport Elevation)
             </label>
           </div>
           <div class="form-check">
-            <input class="form-check-input" type="radio" formControlName="elevationOption" value="known"
+            <input
+              class="form-check-input"
+              type="radio"
+              formControlName="elevationOption"
+              value="manual"
               id="manualSelectElevation">
             <label class="form-check-label" for="manualSelectElevation">
               Enter Site Elevation
             </label>
           </div>
         </div>
+        <div *ngIf="TopElevationForm.get('elevationOption')?.value === 'manual'">
+          <div class="mb-3">
+            <label for="Site_Elevation" class="form-label">Site Elevation</label>
+            <div class="input-group">
+              <input
+                type="number"
+                class="form-control"
+                formControlName="Site_Elevation"
+                id="Site_Elevation"
+                placeholder="Site Elevation">
+              <span class="input-group-text">
+                <i class="bi bi-pencil-square"></i>
+              </span>
+            </div>
+          </div>
+        </div>
+       
         <div *ngIf="TopElevationForm.get('elevationOption')?.value === 'known'">
           <div class="mb-3">
             <label for="Site_Elevation" class="form-label">Site Elevation</label>
@@ -166,7 +192,7 @@
       </div>
      
       <div class="modal-body">
-        <h4 style="color: red;">This is not an NOC, information is provided only for reference</h4>
+        <h5 style="color: red;">This is not a No Objection Certificate (NOC), information is provided only for guidance.</h5>
  
         <table class="table table-hover">
           <tbody>
@@ -198,11 +224,10 @@
         </div>
       </div>
       <div class="modal-footer">
-        <p>Our range of services will assist you in WGS-84 Survey & NOC application process support. Please connect for details. We wish you success in your project. </p>
+        <p>Our range of services will assist you in WGS-84 Survey & NOC application process support.</p>
           <button type="button" class="btn btn-outline-primary rounded-5" (click)="applyForNOC()">Apply For NOC</button>
        
-        <button type="button" class="btn btn-outline-primary rounded-5" routerLink="/request-Service">Check-Out
-          Now</button>
+        <button type="button" class="btn btn-outline-primary rounded-5" routerLink="/request-Service">Other Services</button>
        
       </div>
     </div>
@@ -221,7 +246,7 @@
       </div>
      
       <div class="modal-body">
-        <h4 style="color: red;">This is not an NOC, information is provided only for reference</h4>
+        <h5 style="color: red;">This is not a No Objection Certificate (NOC), information is provided only for guidance.</h5>
  
         <div>
           <b>Site location selected by the user is outside {{ outsideMapData.airport_name }} CCZM boundary published by
@@ -250,11 +275,10 @@
         </div>
       </div>
       <div class="modal-footer">
-        <p>Our range of services will assist you in WGS-84 Survey & NOC application process support. Please connect for details. We wish you success in your project. </p>
+        <p>Our range of services will assist you in WGS-84 Survey & NOC application process support.</p>
           <button type="button" class="btn btn-outline-primary rounded-5" (click)="applyForNOC()">Apply For NOC</button>
        
-        <button type="button" class="btn btn-outline-primary rounded-5" routerLink="/request-Service">Check-Out
-          Now</button>
+        <button type="button" class="btn btn-outline-primary rounded-5" routerLink="/request-Service">Other Services</button>
          
       </div>
     </div>

@@ -33,7 +33,7 @@ export class UsersRegisterComponent implements OnInit {
       password: ['', [Validators.required, Validators.minLength(8), Validators.pattern(/^(?=.*[a-zA-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/)]],
       otp: ['', [Validators.required, Validators.pattern('^[0-9]{4}$')]],
       uname: ['', [Validators.required, Validators.pattern(/^[a-zA-Z\s]+$/)]],
-      address: ['', [Validators.required,Validators.pattern(/^[a-zA-Z0-9\s,.'-]$/)]],
+      address: ['', [Validators.required]],
     });
   }
   

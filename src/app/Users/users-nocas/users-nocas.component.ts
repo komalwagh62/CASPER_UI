@@ -237,7 +237,7 @@ export class UsersNOCASComponent implements OnInit {
       this.TopElevationForm.patchValue({ Site_Elevation: defaultElevation });
  
       // Notify the user
-      this.toastr.info(`Elevation updated based on the selected city (${selectedCity}).`);
+      // this.toastr.info(`Elevation updated based on the selected city (${selectedCity}).`);
     }
   }
  
@@ -1262,7 +1262,7 @@ export class UsersNOCASComponent implements OnInit {
       const defaultElevation = this.feetToMeters(elevation);
       this.TopElevationForm.patchValue({ Site_Elevation: defaultElevation });
  
-      this.toastr.info(`Elevation updated based on the selected city (${selectedCity}).`);
+      // this.toastr.info(`Elevation updated based on the selected city (${selectedCity}).`);
     } else if (elevationOption === 'manual') {
       // Optionally, you can clear or set a default value
       this.TopElevationForm.patchValue({ Site_Elevation: '' });
@@ -1364,9 +1364,20 @@ export class UsersNOCASComponent implements OnInit {
           });
         },
         (error) => {
-          // console.error('Error getting user location:', error);
-          alert('Error getting user location. Please make sure location services are enabled and try again.');
+          switch(error.code) {
+            case error.PERMISSION_DENIED:
+              alert("User denied the request for Geolocation.");
+              break;
+            case error.POSITION_UNAVAILABLE:
+              alert("Location information is unavailable.");
+              break;
+            case error.TIMEOUT:
+              alert("The request to get user location timed out.");
+              break;
+            
+          }
         },
+        
         { enableHighAccuracy: true }
       );
     } else {

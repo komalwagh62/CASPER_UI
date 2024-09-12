@@ -42,6 +42,7 @@
               "core-js/modules/es.string.includes.js",
               "core-js/modules/es.array.reverse.js",
               "core-js/modules/es.regexp.to-string.js",
+              "sweetalert2",
               "leaflet",
               "canvg",
               "rgbcolor",

@@ -11,40 +11,40 @@
                     <div class="card-body">
                         <div class="input-group mb-3">
                             <span class="input-group-text" id="basic-addon1"> <i class="bi bi-person-circle"></i></span>
-                            <input type="text" class="form-control" placeholder="Username" aria-label="Username"
+                            <input type="text" autocomplete  class="form-control" placeholder="Username" aria-label="Username"
                                 aria-describedby="basic-addon1" value="{{ user.uname }}" readonly>
                         </div>
                         <div class="input-group mb-3">
                             <span class="input-group-text" id="basic-addon1"> <i
                                     class="bi bi-envelope-at-fill"></i></span>
-                            <input type="email" class="form-control" placeholder="email" aria-label="email"
+                            <input type="email" autocomplete  class="form-control" placeholder="email" aria-label="email"
                                 aria-describedby="basic-addon1" value="{{ user.email }}" readonly>
                         </div>
                         <form [formGroup]="requestForm" (ngSubmit)="createRequest()">
                             <div class="input-box">
                                 <div class="checkbox-item">
-                                    <input type="checkbox" id="aeronauticalStudy" name="service4"
+                                    <input type="checkbox" autocomplete  id="aeronauticalStudy" name="service4"
                                         value="Aeronautical Study Assessment Support"
                                         formControlName="service4">
                                     <label for="aeronauticalStudy" class="checkbox-label">Aeronautical Study Assessment Support</label>
                                 </div>
                                 <div class="checkbox-item">
-                                    <input type="checkbox" id="Pre-aeronautical Study Assessment" name="service3"
+                                    <input type="checkbox" autocomplete  id="Pre-aeronautical Study Assessment" name="service3"
                                         value="Pre-aeronautical Study Assessment" formControlName="service3">
                                     <label for="preAeronauticalStudy" class="checkbox-label">Pre-aeronautical Study Assessment</label>
                                 </div>
                                <div class="checkbox-item">
-                                    <input type="checkbox" id="SessionwithSME" name="service6"
+                                    <input type="checkbox" autocomplete  id="SessionwithSME" name="service6"
                                       value="Session with SME" formControlName="service6">
                                     <label for="SessionwithSME" class="checkbox-label">Session with SME</label>
                                   </div>
                                 <div class="checkbox-item">
-                                    <input type="checkbox" id="Site Survey (WGS-84)" name="service1" value="Site Survey (WGS-84)"
+                                    <input type="checkbox" autocomplete  id="Site Survey (WGS-84)" name="service1" value="Site Survey (WGS-84)"
                                         formControlName="service1">
                                     <label for="Site Survey (WGS-84)" class="checkbox-label">Site Survey (WGS-84)</label>
                                 </div>
                                 <div class="checkbox-item">
-                                    <input type="checkbox" id="documentsManagement" name="service5"
+                                    <input type="checkbox" autocomplete id="documentsManagement" name="service5"
                                         value="Documents & Process Management" formControlName="service5">
                                     <label for="documentsManagement" class="checkbox-label">Documents & Process
                                         Management</label>

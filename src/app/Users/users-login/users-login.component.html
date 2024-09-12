@@ -10,7 +10,7 @@
                 <span>It's not long before you embark on this journey! </span>
                 <div>
                     <div class="input-container mt-4">
-                        <input type="email" placeholder="Email" formControlName="email" autocomplete="email" id="email"
+                        <input type="email" placeholder="Email" autocomplete  formControlName="email" autocomplete="email" id="email"
                             required>
                         <i class="bi bi-envelope-at-fill"></i>
                     </div>
@@ -26,7 +26,7 @@
                 </div>
                 <div>
                     <div class="input-container">
-                        <input type="password" placeholder="Password" [type]="showPassword ? 'text' : 'password'"
+                        <input type="password" placeholder="Password" autocomplete  [type]="showPassword ? 'text' : 'password'"
                             id="password" autocomplete="password" formControlName="password"
                             placeholder="8+ (a, A, 1, #)">
                         <i class="bi" [ngClass]="{'bi-eye-slash-fill': !showPassword, 'bi-eye-fill': showPassword}"

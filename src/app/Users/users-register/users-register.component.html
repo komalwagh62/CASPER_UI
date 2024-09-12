@@ -12,7 +12,7 @@
                 <span>It's not long before you embark on this journey!</span>
                 <div>
                     <div class="input-container mt-4">
-                        <input type="text" placeholder="Enter Your Name" (input)="onNameInput($event)"
+                        <input type="text" autocomplete  placeholder="Enter Your Name" (input)="onNameInput($event)"
                             formControlName="uname" autocomplete="name" id="uname" required>
                         <i class="bi bi-person-fill suffix"></i>
                     </div>
@@ -28,7 +28,7 @@
                 </div>
                 <div>
                     <div class="input-container ">
-                        <input type="email" placeholder="Enter Your Email Id" formControlName="email"
+                        <input type="email" autocomplete  placeholder="Enter Your Email Id" formControlName="email"
                             autocomplete="email" id="email" ngModel email="true" required>
                         <i class="bi bi-envelope-fill suffix"></i>
                     </div>
@@ -45,7 +45,7 @@
                 <div>
                     <div class="input-container ">
                         <!-- <span class="prefix">+91</span> -->
-                        <input type="tel" placeholder="Phone Number" formControlName="phone_number"
+                        <input type="tel" autocomplete  placeholder="Phone Number" formControlName="phone_number"
                             (keypress)="onPhoneNumberKeyPress($event)" minlength="10" maxlength="10" autocomplete="tel"
                             id="phone_number" (change)="onPhoneNumberChange()" required>
                         <i class="bi bi-telephone-fill suffix"></i>
@@ -62,7 +62,7 @@
                 </div>
                 <div *ngIf="otpSent">
                     <div class="input-container ">
-                        <input type="tel" placeholder="OTP" formControlName="otp" (keypress)="onOtpKeyPress($event)"
+                        <input type="tel" autocomplete  placeholder="OTP" formControlName="otp" (keypress)="onOtpKeyPress($event)"
                             autocomplete="one-time-code" id="otp" required maxlength="4" pattern="[0-9]*">
                         <button type="button" class="btn suffix" (click)="regenerateOtp()">
                             <i class="bi bi-arrow-repeat suffix"></i>
@@ -80,7 +80,7 @@
                 </div>
                 <div>
                     <div class="input-container ">
-                        <input type="text" placeholder="Enter Your Address" formControlName="address"
+                        <input type="text" autocomplete  placeholder="Enter Your Address" formControlName="address"
                             autocomplete="address" id="address" required>
                         <i class="bi bi-house-fill suffix"></i>
                     </div>
@@ -96,7 +96,7 @@
                 </div>
                 <div>
                     <div class="input-container">
-                        <input type="password" placeholder="Password" [type]="showPassword ? 'text' : 'password'"
+                        <input type="password" autocomplete placeholder="Password" [type]="showPassword ? 'text' : 'password'"
                             id="password" autocomplete="password" formControlName="password"
                             placeholder="Enter Your Password">
                         <i class="bi suffix"

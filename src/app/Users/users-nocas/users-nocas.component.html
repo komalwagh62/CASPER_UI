@@ -24,7 +24,7 @@
           <div class="mb-3">
             <label for="Site_latitude" class="form-label">Site Latitude</label>
             <div class="input-group">
-              <input type="dms" class="form-control" [value]="latitudeDMS" name="Latitude" formControlName="Latitude"
+              <input type="dms" class="form-control" autocomplete  [value]="latitudeDMS" name="Latitude" formControlName="Latitude"
                 id="Latitude" placeholder="19°4'29.28 N">
               <span class="input-group-text">
                 <i class="bi bi-geo-alt-fill"></i>
@@ -35,7 +35,7 @@
           <div class="mb-3">
             <label for="Site_longitude" class="form-label">Site Longitude</label>
             <div class="input-group">
-              <input type="dms" class="form-control" [value]="longitudeDMS" name="Longitude"
+              <input type="dms" class="form-control" autocomplete  [value]="longitudeDMS" name="Longitude"
                 formControlName="Longitude" id="Longitude" placeholder="72°53'8.16 E">
               <span class="input-group-text">
                 <i class="bi bi-geo-alt-fill"></i>
@@ -78,7 +78,7 @@
           <div class="mb-2">
             <label for="airportName" class="form-label">Airport Name</label>
             <div class="input-group">
-              <input type="text" id="airportName" class="form-control" [value]="selectedAirportName"
+              <input type="text" id="airportName" autocomplete  class="form-control" [value]="selectedAirportName"
                 placeholder="Airport Name" readonly>
               <span class="input-group-text">
                 <i class="bi bi-airplane-fill"></i>
@@ -133,7 +133,7 @@
           <div class="mb-3">
             <label for="Site_Elevation" class="form-label">Site Elevation</label>
             <div class="input-group">
-              <input type="number" class="form-control" formControlName="Site_Elevation" id="Site_Elevation"
+              <input type="number" class="form-control" autocomplete  formControlName="Site_Elevation" id="Site_Elevation"
                 placeholder="Site Elevation">
               <span class="input-group-text">
                 <i class="bi bi-pencil-square"></i>
@@ -166,7 +166,7 @@
         <div id="airportList">
           <div *ngFor="let airport of closestAirportList; let i = index">
             {{ i + 1 }}.
-            <input type="checkbox" class="closest-airport-checkbox" [attr.data-airport-city]="airport.airportCity"
+            <input type="checkbox" autocomplete  class="closest-airport-checkbox" [attr.data-airport-city]="airport.airportCity"
               [attr.data-airport-name]="airport.airportName" [attr.data-distance]="airport.distance"
               (change)="updateSelectedAirport(airport.airportCity, airport.airportName, airport.distance)">
             {{ airport.airportName }}

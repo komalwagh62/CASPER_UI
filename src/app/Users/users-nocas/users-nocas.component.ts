@@ -8,6 +8,8 @@ import * as domtoimage from 'dom-to-image';
 declare var Razorpay: any;
 import { ToastrService } from 'ngx-toastr';
 import Swal from 'sweetalert2';
+import * as CryptoJS from 'crypto-js';
+ 
 @Component({
   selector: 'app-users-nocas',
   templateUrl: './users-nocas.component.html',
@@ -480,7 +482,17 @@ export class UsersNOCASComponent implements OnInit {
  
  
  
-  loadGeoJSON(map: any, zoomLevel: number = 10) {
+  secretKey = 'your-secret-key';
+ 
+  // Decrypt data
+  decryptData = (encryptedData: string | CryptoJS.lib.CipherParams) => {
+    const bytes = CryptoJS.AES.decrypt(encryptedData, this.secretKey);
+    return JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
+  };
+ 
+ 
+ 
+  loadGeoJSON(map : any, zoomLevel = 10) {
     if (!map) {
       console.error("Map object is required to load GeoJSON.");
       return;
@@ -501,147 +513,9 @@ export class UsersNOCASComponent implements OnInit {
     // Get selected city from the form
     const selectedAirportCITY = this.TopElevationForm.get('CITY')?.value;
     if (selectedAirportCITY) {
-      const airportData: { [key: string]: { path: string, coords: [number, number] } } = {
-        'Puri': { path: 'assets/GeoJson/Puri.geojson', coords: [19.81, 85.83] },
-        'Mumbai': { path: 'assets/GeoJson/Mumbai.geojson', coords: [19.09155556, 72.86597222] },
-        'Coimbatore': { path: 'assets/GeoJson/Coimbatore.geojson', coords: [11.02691111, 77.04180278] },
-        'Ahemdabad': { path: 'assets/GeoJson/Ahemdabad.geojson', coords: [23.07119167, 72.62643333] },
-        'Akola': { path: 'assets/GeoJson/Akola.geojson', coords: [20.69851583, 77.05776056] },
-        'Chennai': { path: 'assets/GeoJson/Chennai.geojson', coords: [12.99510000, 80.17360278] },
-        'Delhi': { path: 'assets/GeoJson/Delhi.geojson', coords: [28.61, 77.20] },
-        'Guwahati': { path: 'assets/GeoJson/Guwahati.geojson', coords: [26.10502222, 91.58543889] },
-        'Hyderabad': { path: 'assets/GeoJson/Chennai.geojson', coords: [17.38, 78.48] },
-        'Jaipur': { path: 'assets/GeoJson/Jaipur.geojson', coords: [26.82417278, 75.80247833] },
-        'Nagpur': { path: 'assets/GeoJson/Nagpur.geojson', coords: [21.09172500, 79.04819722] },
-        'Thiruvananthapuram': { path: 'assets/GeoJson/Trivendrum.geojson', coords: [8.49319444, 76.90915833] },
-        'Vadodara': { path: 'assets/GeoJson/Vadodara.geojson', coords: [22.33004167, 73.21884444] },
-        'Varanasi': { path: 'assets/GeoJson/Varanasi.geojson', coords: [25.45121111, 82.85860556] },
-        'Agatti': { path: 'assets/GeoJson/Agatti.geojson', coords: [10.82421944, 72.17663611] },
-        'Aligarh': { path: 'assets/GeoJson/Aligarh.geojson', coords: [27.86130000, 78.14706944] },
-        'Ambikapur': { path: 'assets/GeoJson/Ambikapur.geojson', coords: [22.99345833, 83.19275222] },
-        'Amritsar': { path: 'assets/GeoJson/Amritsar.geojson', coords: [31.71059167, 74.80015556] },
-        'Aurangabad': { path: 'assets/GeoJson/Aurangabad.geojson', coords: [19.86439444, 75.39756111] },
-        'Azamgarh': { path: 'assets/GeoJson/Azamgarh.geojson', coords: [26.15734917, 83.11402361] },
-        'Balurghat': { path: 'assets/GeoJson/Balurghat.geojson', coords: [25.26355000, 88.79562750] },
-        'Baramati': { path: 'assets/GeoJson/Baramati.geojson', coords: [18.22662222, 74.58969722] },
-        'Belgaum': { path: 'assets/GeoJson/Belgaum.geojson', coords: [15.85840278, 74.61769167] },
-        'Berhampur': { path: 'assets/GeoJson/Berhampur.geojson', coords: [19.29156278, 84.87916861] },
-        'Bial': { path: 'assets/GeoJson/Bial.geojson', coords: [13.19887167, 77.70547778] },
-        'Bokaro': { path: 'assets/GeoJson/Bokaro.geojson', coords: [23.64352944, 86.14964472] },
-        'Cochin': { path: 'assets/GeoJson/Cochin.geojson', coords: [10.15, 76.40] },
-        'Deesa': { path: 'assets/GeoJson/Deesa.geojson', coords: [24.26777778, 72.20277778] },
-        'Diburgarh': { path: 'assets/GeoJson/Diburgarh.geojson', coords: [27.86130000, 78.14706944] },
-        'Diu': { path: 'assets/GeoJson/Diu.geojson', coords: [20.71379444, 70.92288056] },
-        'Durgapur': { path: 'assets/GeoJson/Aligarh.geojson', coords: [23.62444444, 87.24250000] },
-        'Gaya': { path: 'assets/GeoJson/Gaya.geojson', coords: [24.74803889, 84.94243611] },
-        'Hisar': { path: 'assets/GeoJson/Hisar.geojson', coords: [29.15, 75.73] },
-        'Hubli': { path: 'assets/GeoJson/Hubli.geojson', coords: [15.36183889, 75.08436667] },
-        'Imphal': { path: 'assets/GeoJson/Imphal.geojson', coords: [24.76431667, 93.89963889] },
-        'Jabalpur': { path: 'assets/GeoJson/Aligarh.geojson', coords: [23.18337222, 80.06044444] },
-        'Jewer': { path: 'assets/GeoJson/Jewer.geojson', coords: [28.17561111, 77.60624167] },
-        'Jharsaugada': { path: 'assets/GeoJson/Jharsaugada.geojson', coords: [21.91481944, 84.04869167] },
-        'Jogbani': { path: 'assets/GeoJson/Jogbani.geojson', coords: [26.29618056, 87.28654722] },
-        'Kadapa': { path: 'assets/GeoJson/Kadapa.geojson', coords: [14.51304722, 78.77219167] },
-        'Kandla': { path: 'assets/GeoJson/Jewer.geojson', coords: [23.11220000, 70.10056667] },
-        'Kangra': { path: 'assets/GeoJson/Kangra.geojson', coords: [32.16473611, 76.26215556] },
-        'Kannur': { path: 'assets/GeoJson/Kannur.geojson', coords: [11.91573056, 75.54572222] },
-        'Keshod': { path: 'assets/GeoJson/Keshod.geojson', coords: [21.31498889, 70.26913889] },
-        'Khajuraho': { path: 'assets/GeoJson/Khajuraho.geojson', coords: [24.81983056, 79.91857500] },
-        'Kishangarh': { path: 'assets/GeoJson/Kishangarh.geojson', coords: [26.60125, 74.81415] },
-        'Kullu': { path: 'assets/GeoJson/Kullu.geojson', coords: [31.87681389, 77.15525833] },
-        'Kurnool': { path: 'assets/GeoJson/Kurnool.geojson', coords: [15.71475556, 78.16298611] },
-        'Kushinagar': { path: 'assets/GeoJson/Kushinagar.geojson', coords: [26.77277778, 83.89527778] },
-        'Lalitpur': { path: 'assets/GeoJson/Lalitpur.geojson', coords: [24.71647083, 78.41612444] },
-        'Lilabari': { path: 'assets/GeoJson/Lilabari.geojson', coords: [27.29122778, 94.09352778] },
-        'Lucknow': { path: 'assets/GeoJson/Lucknow.geojson', coords: [26.76185278, 80.88342778] },
-        'Ludhiana': { path: 'assets/GeoJson/Ludiana.geojson', coords: [30.90, 75.85] },
-        'Mangalore': { path: 'assets/GeoJson/Manglore.geojson', coords: [12.96139611, 74.89004722] },
-        'Meerut': { path: 'assets/GeoJson/Meerut.geojson', coords: [28.58744583, 77.70449167] },
-        'Muzaffarpur': { path: 'assets/GeoJson/Muzaffarpur.geojson', coords: [26.12, 85.38] },
-        'Mysore': { path: 'assets/GeoJson/Mysore.geojson', coords: [12.30, 76.65] },
-        'Nanded': { path: 'assets/GeoJson/Nanded.geojson', coords: [19.18103861, 77.32254722] },
-        'Pakyong': { path: 'assets/GeoJson/Pakyong.geojson', coords: [27.13, 88.61] },
-        'Pantnagar': { path: 'assets/GeoJson/Patanagar.geojson', coords: [29.03214722, 79.47246944] },
-        'Patna': { path: 'assets/GeoJson/Patna.geojson', coords: [25.59361111, 85.09183333] },
-        'Porbandar': { path: 'assets/GeoJson/Porbandar.geojson', coords: [21.65034583, 69.65880028] },
-        'Rajamundary': { path: 'assets/GeoJson/Rajamundary.geojson', coords: [17.10944444, 81.81944444] },
-        'Rourkela': { path: 'assets/GeoJson/Rourkela.geojson', coords: [22.25623889, 84.81460833] },
-        'Shirdi': { path: 'assets/GeoJson/Shirdi.geojson', coords: [19.69083333, 74.37166667] },
-        'Sholapur': { path: 'assets/GeoJson/Sholapur.geojson', coords: [17.62765278, 75.93403889] },
-        'Tiruchirapalli': { path: 'assets/GeoJson/Tiruchirapalli.geojson', coords: [10.765, 78.710] },
-        'Tirupati': { path: 'assets/GeoJson/Tirupati.geojson', coords: [13.63296389, 79.54190833] },
-        'Udaipur': { path: 'assets/GeoJson/Udaipur.geojson', coords: [20.09765028, 83.18355250] },
-        'Utkela': { path: 'assets/GeoJson/Utkela.geojson', coords: [20.459722, 83.818333] },
-        'Vellore': { path: 'assets/GeoJson/Vellore.geojson', coords: [12.90810639, 79.06714361] },
-        'Warangal': { path: 'assets/GeoJson/Warangal.geojson', coords: [17.91703361, 79.59933194] },
-        'Calicut': { path: 'assets/GeoJson/Calicut.geojson', coords: [11.13785000, 75.95057222] },
-        'Agartala': { path: 'assets/GeoJson/Agartala.geojson', coords: [23.89055556, 91.23916667] },
-        'Dimapur': { path: 'assets/GeoJson/Dimapur.geojson', coords: [25.88345756, 93.77135750] },
-        'Kota': { path: 'assets/GeoJson/Kota.geojson', coords: [25.16008333, 75.84783333] },
-        'Madurai': { path: 'assets/GeoJson/Madurai.geojson', coords: [9.83500000, 78.08861111] },
-        'Kolhapur': { path: 'assets/GeoJson/Kolhapur.geojson', coords: [16.66637222, 74.29048056] },
-        'Kolkata': { path: 'assets/GeoJson/Kolkata.geojson', coords: [22.65473944, 88.44672222] },
-        'Bhopal': { path: 'assets/GeoJson/Bhopal.geojson', coords: [23.28691944, 77.33696389] },
-        'Mopa': { path: 'assets/GeoJson/Mopa.geojson', coords: [15.74249889, 73.86701028] },
-        'Bhavnagar': { path: 'assets/GeoJson/Bhavnagar.geojson', coords: [21.75425139, 72.19052528] },
-        'Dehradun': { path: 'assets/GeoJson/Dehradun.geojson', coords: [30.19063056, 78.18222222] },
-        'Hirsar': { path: 'assets/GeoJson/Hirsar.geojson', coords: [29.1833, 75.7167] },
-        'Jamshedpur': { path: 'assets/GeoJson/Jamshedpur.geojson', coords: [22.81455417, 86.16901472] },
-        'Deoghar': { path: 'assets/GeoJson/Deoghar.geojson', coords: [24.44637500, 86.71666667] },
-        'Donakonda': { path: 'assets/GeoJson/Donakonda.geojson', coords: [15.82472167, 79.48233389] },
-        'Shimla': { path: 'assets/GeoJson/Shimla.geojson', coords: [31.08158083, 77.06767694] },
-        'Cooch Behar': { path: 'assets/GeoJson/CoochBehar.geojson', coords: [26.32965556, 89.46711389] },
-        'Bhuvneshwar': { path: 'assets/GeoJson/Bhuvneshwar.geojson', coords: [20.26420972, 85.80248556] },
-        'Tuticorin': { path: 'assets/GeoJson/Tuticorin.geojson', coords: [8.72229167, 78.02617500] },
-        'Bengaluru': { path: 'assets/GeoJson/Banglore.geojson', coords: [13.19887167, 77.70547778] },
-        'Jeypore': { path: 'assets/GeoJson/Jaypore.geojson', coords: [18.88055558, 82.55361111] },
-        'Jalgaon': { path: 'assets/GeoJson/Jalgaon.geojson', coords: [20.96130556, 75.62459722] },
-        'Puducherry': { path: 'assets/GeoJson/Puducherry.geojson', coords: [11.96731944, 79.81143056] },
-        'Raipur': { path: 'assets/GeoJson/Raipur.geojson', coords: [21.18100056, 81.73859194] },
-        'Ranchi': { path: 'assets/GeoJson/Ranchi.geojson', coords: [23.31416667, 85.32111111] },
-        'Surat': { path: 'assets/GeoJson/Surat.geojson', coords: [21.11604444, 72.74181944] },
-        'Vijaywada': { path: 'assets/GeoJson/Vijaywada.geojson', coords: [16.533597, 80.803283] },
-        'Birlamgram': { path: 'assets/GeoJson/Birlamgram.geojson', coords: [23.45, 75.416667] },
-        'Ayodhya': { path: 'assets/GeoJson/Ayodhya.geojson', coords: [26.7980, 82.2080] },
-        'Chitrakoot': { path: 'assets/GeoJson/Chitrakoot.geojson', coords: [25.2320, 80.8250] },
-        'Ghaziabad': { path: 'assets/GeoJson/Ghaziabad.geojson', coords: [28.707778, 77.358333] },
-        'Ambala': { path: 'assets/GeoJson/Ambala.geojson', coords: [30.370833, 76.817778] },
-        'Goa': { path: 'assets/GeoJson/Goa.geojson', coords: [15.3725, 73.831389] },
-        'Pune': { path: 'assets/GeoJson/Pune.geojson', coords: [18.582222, 73.919722] },
-        'Cimbatore': { path: 'assets/GeoJson/Cimbatore.geojson', coords: [11.013611, 77.159722] },
-        'Arakkonnam': { path: 'assets/GeoJson/Arakkonnam.geojson', coords: [13.071111, 79.691111] },
-        'Jodhpur': { path: 'assets/GeoJson/Jodhpur.geojson', coords: [26.257222, 73.051667] },
-        'Leh': { path: 'assets/GeoJson/Leh.geojson', coords: [34.135833, 77.545278] },
-        'Pathankot': { path: 'assets/GeoJson/Pathankot.geojson', coords: [32.233611, 75.634444] },
-        'Nicobar islands': { path: 'assets/GeoJson/NicobarIslands.geojson', coords: [9.1525, 92.819722] },
-        'Tezpur': { path: 'assets/GeoJson/Tezpur.geojson', coords: [26.712222, 92.787222] },
-        'Thanjavur': { path: 'assets/GeoJson/Thanjavur.geojson', coords: [10.722222, 79.101389] },
-        'Agra': { path: 'assets/GeoJson/Agra.geojson', coords: [27.161832, 77.970727] },
-        'Kochi': { path: 'assets/GeoJson/Kochi.geojson', coords: [9.940000, 76.275000] },
-        'Banglore': { path: 'assets/GeoJson/Banglre.geojson', coords: [13.135833, 77.607500] },
-        'Aizawl': { path: 'assets/GeoJson/Aizawl_Lengpui.geojson', coords: [23.2551083, 92.6203583] },
-        'Shillong': { path: 'assets/GeoJson/Shillong.geojson', coords: [25.70361111, 91.97861111] },
-        'Bilaspur': { path: 'assets/GeoJson/Bilaspur.geojson', coords: [21.98833333, 82.11111111] },
-        'Indore': { path: 'assets/GeoJson/Indore.geojson', coords: [23.72166667, 75.80083333] },
-        'Itanagar': { path: 'assets/GeoJson/Itanagar.geojson', coords: [26.9718, 93.643] },
-        'Gondia': { path: 'assets/GeoJson/Gondia.geojson', coords: [21.52555556, 80.28916667] },
-        'Nashik': { path: 'assets/GeoJson/Nashik.geojson', coords: [20.1194444, 73.9136111] },
-        'Jagdalpur': { path: 'assets/GeoJson/Jagdalpur.geojson', coords: [19.07444444, 82.03694444] },
-        'Vidyanagar': { path: 'assets/GeoJson/Vidyanagar.geojson', coords: [15.175, 73.6341] },
-        'Kalaburagi': { path: 'assets/GeoJson/Kalaburagi.geojson', coords: [17.30777778, 76.95805556] },
-        'Moradabad': { path: 'assets/GeoJson/Moradabad.geojson', coords: [28.81944444, 78.92333333] },
-        'Pithoragarh': { path: 'assets/GeoJson/Pithoragarh.geojson', coords: [29.5924583, 80.241775] },
-        'Rupsi': { path: 'assets/GeoJson/Rupsi.geojson', coords: [26.14111111, 89.90666667] },
-        'Salem': { path: 'assets/GeoJson/Salem.geojson', coords: [11.7819444, 78.0644444] },
-        'Shivamogga': { path: 'assets/GeoJson/Shivamogga.geojson', coords: [13.85472222, 75.61055556] },
-        'Sindhudurg': { path: 'assets/GeoJson/Sindhudurg.geojson', coords: [16.0, 73.5333333] },
-        'Tezu': { path: 'assets/GeoJson/Tezu.geojson', coords: [27.9422, 96.1339] },
-        'Angul': { path: 'assets/GeoJson/Angul.geojson', coords: [20.91055556, 85.03527778] },
-        'Koppal': { path: 'assets/GeoJson/Koppal.geojson', coords: [15.3593111, 76.2192] },
-        'Beas': { path: 'assets/GeoJson/Beas.geojson', coords: [31.56055556, 75.34111111] },
-        'Hosur': { path: 'assets/GeoJson/Hosur.geojson', coords: [12.66111111, 77.76694444] },
-        'Raigarh': { path: 'assets/GeoJson/Raigarh.geojson', coords: [21.82388889, 83.36027778] },
-        'Puttaparthi': { path: 'assets/GeoJson/Puttaparthi.geojson', coords: [14.14916667, 77.79111111] },
+      const airportData: { [key: string]: { coords: [number, number] } } = {
+        'Akola': { coords: [20.69851583, 77.05776056] }
+       
       };
  
       const airportInfo = airportData[selectedAirportCITY];
@@ -649,36 +523,44 @@ export class UsersNOCASComponent implements OnInit {
         this.airportCoordinates = airportInfo.coords;
         map.setView(this.airportCoordinates, zoomLevel);
  
-        // Load the GeoJSON file using the path
-        fetch(airportInfo.path)
-          .then(response => response.json())
-          .then(geojsonData => {
-            const features = geojsonData.features;
-            const style = (feature: any) => {
+        // Construct the API URL using the selected airport city
+        const apiUrl = `http://localhost:3001/api/geojson/${selectedAirportCITY}`;
+ 
+        // Fetch the encrypted GeoJSON data from the backend API
+        fetch(apiUrl)
+          .then(response => response.text())
+          .then(encryptedData => {
+            const geoJsonData = this.decryptData(encryptedData);
+ 
+            const style = (feature:any) => {
               const color = feature.properties.Color;
               return { fillColor: color, weight: 2 };
             };
-            const geojsonLayer = L.geoJSON(features, { style: style });
-            geojsonLayer.addTo(map);
-            this.geojsonLayer = geojsonLayer;
-            map.fitBounds(geojsonLayer.getBounds());
-            let customIcon = L.icon({
+            this.geojsonLayer = L.geoJSON(geoJsonData, { style: style }).addTo(map);
+            map.fitBounds(this.geojsonLayer.getBounds());
+ 
+            const customIcon = L.icon({
               iconUrl: 'assets/marker-airport.png',
               shadowUrl: 'https://opentopomap.org/leaflet/images/marker-shadow.png',
               iconSize: [40, 41],
               shadowSize: [40, 41],
               iconAnchor: [12, 40],
             });
+ 
+            // Remove previous marker if exists
             if (this.marker2) {
               map.removeLayer(this.marker2);
               this.marker2 = null;
             }
+ 
             this.marker2 = L.marker(this.airportCoordinates, { icon: customIcon }).addTo(map);
             const popupContent = `ARP:
-            <p>${selectedAirportCITY} Airport</p><br>
-            Latitude: ${this.airportCoordinates[0].toFixed(2)}
-            Longitude: ${this.airportCoordinates[1].toFixed(2)}`;
+              <p>${selectedAirportCITY} Airport</p><br>
+              Latitude: ${this.airportCoordinates[0].toFixed(2)}
+              Longitude: ${this.airportCoordinates[1].toFixed(2)}`;
             this.marker2.bindPopup(popupContent).openPopup();
+ 
+            // Handle other markers (if needed)
             if (this.marker) {
               map.removeLayer(this.marker);
               this.marker = null;
@@ -686,13 +568,12 @@ export class UsersNOCASComponent implements OnInit {
             this.marker = L.marker([this.lat, this.long]).addTo(map);
           })
           .catch(error => {
- 
- 
+            console.error('Error fetching GeoJSON:', error);
           });
       }
     }
   }
- 
+
  
  updateNearestAirportData() {
     const nearestAirport = this.findNearestAirport(this.lat, this.long, 30);

@@ -9,7 +9,6 @@ declare var Razorpay: any;
 import { ToastrService } from 'ngx-toastr';
 import Swal from 'sweetalert2';
 import * as CryptoJS from 'crypto-js';
- 
 @Component({
   selector: 'app-users-nocas',
   templateUrl: './users-nocas.component.html',
@@ -327,6 +326,63 @@ export class UsersNOCASComponent implements OnInit {
     this.toastr.error(`Missing required fields: ${missingFields.join(', ')}`, 'Form Incomplete');
   }
  
+ 
+ 
+ 
+  findNearestAirport(lat: number, lng: number, radius: number): { airportCity: string; airportName: string; distance: number; elevation: number } | null {
+    const airports = this.airportCoordinatesList;
+    let closestAirport = null;
+    let minDistance = radius;
+    for (const [airportLat, airportLng, airportCity, airportName] of airports) {
+      const distance = this.calculateDistance(lat, lng, airportLat, airportLng);
+      if (distance < minDistance) {
+        closestAirport = {
+          airportCity,
+          airportName,
+          distance,
+          elevation: this.getElevationForCity(airportCity)  // Changed from `this.city` to `airportCity`
+        };
+        minDistance = distance;
+      }
+    }
+    if (closestAirport) {
+      (`Nearest Airport: ${closestAirport.airportName}, Distance: ${closestAirport.distance}`);
+    } else {
+      const selectionMode = this.TopElevationForm.get('selectionMode')?.value;
+      if (selectionMode === 'default') {
+        if (this.geojsonLayer) {
+          this.map.removeLayer(this.geojsonLayer);
+          this.geojsonLayer.clearLayers();
+          this.geojsonLayer = null;
+        }
+        if (this.marker2) {
+          this.map.removeLayer(this.marker2);
+          this.marker2 = null;
+        }
+        this.toastr.info('No airport found within the specified radius.');
+      }
+    }
+    return closestAirport;
+  }
+ 
+  updateMarkersPosition(lat: number | null, lng: number | null): void {
+    this.lat = lat !== null ? lat : this.lat;
+    this.long = lng !== null ? lng : this.long;
+ 
+    this.updateMarkerPosition();
+  }
+ 
+  updateMarkerPosition(): void {
+    if (this.marker) {
+      if (!isNaN(this.lat) && !isNaN(this.long)) {
+        this.latitudeDMS = this.convertDDtoDMS(this.lat, true);
+        this.longitudeDMS = this.convertDDtoDMS(this.long, false);
+        this.marker.setLatLng([this.lat, this.long]);
+        const popupContent = `Site Location : <br> Site Latitude: ${this.latitudeDMS}, Site Longitude: ${this.longitudeDMS}`;
+        this.marker.bindPopup(popupContent).openPopup();
+      }
+    }
+  }
   submitForm() {
     if (!this.apiservice.token) {
       alert('Please Login First');
@@ -425,63 +481,6 @@ export class UsersNOCASComponent implements OnInit {
   }
  
  
-  findNearestAirport(lat: number, lng: number, radius: number): { airportCity: string; airportName: string; distance: number; elevation: number } | null {
-    const airports = this.airportCoordinatesList;
-    let closestAirport = null;
-    let minDistance = radius;
-    for (const [airportLat, airportLng, airportCity, airportName] of airports) {
-      const distance = this.calculateDistance(lat, lng, airportLat, airportLng);
-      if (distance < minDistance) {
-        closestAirport = {
-          airportCity,
-          airportName,
-          distance,
-          elevation: this.getElevationForCity(airportCity)  // Changed from `this.city` to `airportCity`
-        };
-        minDistance = distance;
-      }
-    }
-    if (closestAirport) {
-      (`Nearest Airport: ${closestAirport.airportName}, Distance: ${closestAirport.distance}`);
-    } else {
-      const selectionMode = this.TopElevationForm.get('selectionMode')?.value;
-      if (selectionMode === 'default') {
-        if (this.geojsonLayer) {
-          this.map.removeLayer(this.geojsonLayer);
-          this.geojsonLayer.clearLayers();
-          this.geojsonLayer = null;
-        }
-        if (this.marker2) {
-          this.map.removeLayer(this.marker2);
-          this.marker2 = null;
-        }
-        this.toastr.info('No airport found within the specified radius.');
-      }
-    }
-    return closestAirport;
-  }
- 
-  updateMarkersPosition(lat: number | null, lng: number | null): void {
-    this.lat = lat !== null ? lat : this.lat;
-    this.long = lng !== null ? lng : this.long;
- 
-    this.updateMarkerPosition();
-  }
- 
-  updateMarkerPosition(): void {
-    if (this.marker) {
-      if (!isNaN(this.lat) && !isNaN(this.long)) {
-        this.latitudeDMS = this.convertDDtoDMS(this.lat, true);
-        this.longitudeDMS = this.convertDDtoDMS(this.long, false);
-        this.marker.setLatLng([this.lat, this.long]);
-        const popupContent = `Site Location : <br> Site Latitude: ${this.latitudeDMS}, Site Longitude: ${this.longitudeDMS}`;
-        this.marker.bindPopup(popupContent).openPopup();
-      }
-    }
-  }
- 
- 
- 
   secretKey = 'your-secret-key';
  
   // Decrypt data
@@ -514,7 +513,8 @@ export class UsersNOCASComponent implements OnInit {
     const selectedAirportCITY = this.TopElevationForm.get('CITY')?.value;
     if (selectedAirportCITY) {
       const airportData: { [key: string]: { coords: [number, number] } } = {
-        'Akola': { coords: [20.69851583, 77.05776056] }
+        'Akola': { coords: [20.69851583, 77.05776056] },
+        'Mumbai': {coords: [19.09155556, 72.86597222]}
        
       };
  
@@ -573,7 +573,6 @@ export class UsersNOCASComponent implements OnInit {
       }
     }
   }
-
  
  updateNearestAirportData() {
     const nearestAirport = this.findNearestAirport(this.lat, this.long, 30);
@@ -772,7 +771,7 @@ export class UsersNOCASComponent implements OnInit {
       currency: 'INR',
       name: 'Cognitive Navigation Pvt. Ltd',
       description: ` Plan Subscription`,
-      image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQZ4mHCqV6RQTwJIAON-ZK6QN9rdxF4YK_fLA&s',
+      image: 'https://imgur.com/a/J4UAMhv',
       handler: (response: any) => {
         this.router.navigate(['TransactionDetails']);
         const paymentDetails = {
@@ -1116,7 +1115,7 @@ export class UsersNOCASComponent implements OnInit {
     return cityElevationMap[city] || 0;
   }
  
-  feetToMeters(feet: number): number {
+feetToMeters(feet: number): number {
     return feet * 0.3048;
   }
  
@@ -1245,20 +1244,9 @@ export class UsersNOCASComponent implements OnInit {
           });
         },
         (error) => {
-          switch(error.code) {
-            case error.PERMISSION_DENIED:
-              alert("User denied the request for Geolocation.");
-              break;
-            case error.POSITION_UNAVAILABLE:
-              alert("Location information is unavailable.");
-              break;
-            case error.TIMEOUT:
-              alert("The request to get user location timed out.");
-              break;
-            
-          }
+          console.error('Error getting user location:', error);
+          alert('Error getting user location. Please make sure location services are enabled and try again.');
         },
-        
         { enableHighAccuracy: true }
       );
     } else {
@@ -1469,4 +1457,3 @@ export class UsersNOCASComponent implements OnInit {
  
  
 }
- 

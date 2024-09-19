@@ -38,7 +38,7 @@ export class UsersHomeComponent implements OnInit {
   @ViewChild(MatSort) serviceSort!: MatSort;
   //  @ViewChild(MatSort) sort!: MatSort;
  
-  subscriptiondisplayedColumns: string[] = ['subscription_id', 'subscription_status', 'createdAt', 'expiry_date', 'subscription_type', 'price', 'expand'];
+  subscriptiondisplayedColumns: string[] = ['subscription_id', 'subscription_status','allowed_requests','remaining_requests', 'createdAt', 'expiry_date', 'subscription_type', 'price', 'expand'];
   expandedElement: any | null;
   permissibleDisplayedColumns: string[] = ['city', 'airport_name', 'download','Apply NOC', 'expand'];
   subscriptionDetails: any[] = [];
@@ -134,6 +134,7 @@ export class UsersHomeComponent implements OnInit {
           this.subscriptionDataSource.data = this.filtersubscriptionDetails;
           this.subscriptionDataSource.paginator = this.subscriptionPaginator;
           this.subscriptionDataSource.sort = this.subscriptionSort;
+        
         },
         error => {
           console.error('Failed to fetch subscription data:', error);

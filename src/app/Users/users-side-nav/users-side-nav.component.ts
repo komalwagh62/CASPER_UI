@@ -8,15 +8,18 @@ import { ApiService } from '../Shared/Api/api.service';
   styleUrl: './users-side-nav.component.scss'
 })
 export class UsersSideNavComponent {
-  isloggedIn : boolean = false
-  constructor(private router: Router, public apiService: ApiService) { 
+  isloggedIn: boolean = false
+  currentRoute!: string;
+  constructor(private router: Router, public apiService: ApiService) {
     this.isloggedIn = !!this.apiService.token
+
   }
+
   logout() {
     this.apiService.userData.uname = "";
     this.apiService.token = "";
     this.apiService.isAuthenticated = false;
-    this.apiService.userData.id = ""; 
+    this.apiService.userData.id = "";
     localStorage.removeItem('token');
     localStorage.removeItem('userData');
     this.router.navigate(['UsersLogin']);

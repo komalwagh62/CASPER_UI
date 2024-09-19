@@ -4,11 +4,11 @@
         "secure": false
     },
     "/another-api": {
-        "target": "https://bhashsms.com",
-        "secure": false,
-        "changeOrigin": true,
-        "pathRewrite": {
-            "^/another-api": ""
-        }
+      "target": "https://bhashsms.com",
+      "secure": false,
+      "changeOrigin": true,
+      "pathRewrite": {
+        "^/another-api": ""
+      }
     }
-}
+  }

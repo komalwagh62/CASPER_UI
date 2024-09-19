@@ -13,7 +13,10 @@ import { map, Observable } from 'rxjs';
 export class ApiService {
   [x: string]: any;
   isAuthenticated: boolean = false;
-  public baseUrl: string = 'http://ec2-13-58-174-214.us-east-2.compute.amazonaws.com:8082/api';
+  // public baseUrl: string = 'http://ec2-13-58-174-214.us-east-2.compute.amazonaws.com:8082/api';
+  public baseUrl: string = 'http://Cognitive-Casper-Dev-ALB-1938233015.ap-south-1.elb.amazonaws.com:80/api';
+  // public baseUrl: string = 'http://10.98.10.25:8082/api'
+  ;
   // public baseUrl: string = 'http://localhost:3001/api';
   public loginUserId: string = '';
   public userData!: User;
@@ -38,7 +41,14 @@ export class ApiService {
   updatePassword(email: string, password: string): Observable<any> {
     return this.http.post<any>(`${this.baseUrl}/user/updatePassword`, { email, password });
   }
+  checkSubscriptionStatus(userId: string): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/subscription-status/${userId}`);
+  }
 
+  // Method to update subscription status
+  updateSubscriptionStatus(userId: string, subscriptionStatus: any): Observable<any> {
+    return this.http.put<any>(`${this.baseUrl}/subscription-status/${userId}`, subscriptionStatus);
+  }
   getSubscriptions(userId: string): Observable<any[]> {
     const headers = new HttpHeaders().set('Authorization', `Bearer ${this.token}`);
     return this.http.get<any[]>(`${this.baseUrl}/subscription/getAllsubscriptions?user_id=${userId}`, { headers });
@@ -112,12 +122,30 @@ export class ApiService {
     });
   }
 
-
-
   // Method to change user password
   changeUserPassword(passwordData: { currentPassword: string, newPassword: string }): Observable<any> {
     const headers = new HttpHeaders().set("Authorization", `Bearer ${this.token}`);
     return this.http.post<any>(`${this.baseUrl}/user/changePassword`, passwordData, { headers });
+  }
+
+  getAirportData(): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/airportinfo/airportData`);
+  }
+
+  getAirportGeoJson(city: string): Observable<any> {
+    const url = `${this.baseUrl}/geojson/${city}`;
+    return this.http.get(url, { responseType: 'text' }); // returning text as the response is encrypted
+  }
+
+  // Example decrypt method - implement your decryption logic
+  decryptData(encryptedData: string): any {
+    // Decrypt data logic here
+    return JSON.parse(encryptedData); // Assuming it returns JSON data after decryption
+  }
+
+  // Fetch GeoJSON data for a selected city
+  getGeoJsonData(city: string): Observable<any> {
+    return this.http.get(`${this.baseUrl}/geojson/${city}`, { responseType: 'text' });
   }
 
   private loadFromLocalStorage(): void {

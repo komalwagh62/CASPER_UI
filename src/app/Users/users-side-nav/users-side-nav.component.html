@@ -4,8 +4,7 @@
             <button *ngIf="apiService.token" type="button" aria-label="Toggle sidenav" mat-icon-button
                 (click)="drawer.toggle()" color="primary">
                 <mat-icon aria-label="Side nav toggle icon">menu</mat-icon></button>
-            <img src="assets/icon/CASPER_LOGO.png"
-                alt="NOC from airport autority" routerLink="/" width="130" height="65" >
+            <img src="assets/icon/CASPER_LOGO.png" alt="NOC from airport autority" width="130" height="65" >
             <span class="example-spacer"></span>
             <ng-container *ngIf="apiService.userData?.uname">
                 <button mat-button [matMenuTriggerFor]="menu" class="username-button">Welcome,{{this.apiService.userData.uname}}</button>

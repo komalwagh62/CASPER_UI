@@ -50,7 +50,8 @@
               "jspdf-autotable",
               "dom-to-image",
               "html2canvas",
-              "dompurify"
+              "dompurify",
+              "crypto-js"
             ],
             "polyfills": [
               "zone.js",

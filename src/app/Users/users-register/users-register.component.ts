@@ -75,7 +75,7 @@ export class UsersRegisterComponent implements OnInit {
     const phone = this.SignupForm.value.phone_number;
     const priority = 'ndnd';
     const stype = 'normal';
-
+ 
     // Construct the message text
     const text = `Your Registration OTP is ${this.generatedOTP}. Please do not share this code with anyone. To know more, visit www.cognitivenavigation.com.\n\nBy - Cognitive Navigation`;
 
@@ -84,27 +84,20 @@ export class UsersRegisterComponent implements OnInit {
 
     // Construct the API URL
     const smsApiUrl = `https://bhashsms.com/api/sendmsg.php?user=${user}&pass=${pass}&sender=${sender}&phone=${phone}&text=${encodedText}&priority=${priority}&stype=${stype}`;
-    //  const smsApiUrl = `/another-api/sendmsg.php?user=${user}&pass=${pass}&sender=${sender}&phone=${phone}&text=${encodedText}&priority=${priority}&stype=${stype}`;
 
-    
-    // Send the OTP via the SMS API
     this.http.get(smsApiUrl, { responseType: 'text' }).subscribe(
-      
       (response: any) => {
-       
-        this.toastr.success('OTP sent successfully', 'Success');
+        // Log the API response
+        if (response.includes("SOME_ERROR_MESSAGE") || response.includes("error")) { // Check for any error message in the response
+          // this.toastr.error("Failed to send OTP: " + response, 'Error');
+        } else {
+          this.toastr.success('OTP sent successfully', 'Success');
+        }
       },
-      // (error: HttpErrorResponse) => {
-      //   console.error("Error sending OTP:", error);
-      //   if (error.status === 0) {
-      //     this.toastr.error('Network error or the server is unreachable. Please try again later.', 'Error');
-      //   } else {
-      //     this.toastr.error(`Failed to send OTP: ${error.message}`, 'Error');
-      //   }
-      // }
+      
     );
-
-  }
+   
+}
 
 
   regenerateOtp() {

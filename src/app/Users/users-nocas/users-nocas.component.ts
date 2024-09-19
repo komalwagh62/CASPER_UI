@@ -59,16 +59,11 @@ export class UsersNOCASComponent implements OnInit {
   latitudeErrors: any;
   longitudeErrors: any;
   requestForm!: FormGroup;
+  airportCoordinatesList: Array<[number, number, string, string]> = [];
+  secretKey = 'jwertyuhfdsxajwk2ejndoxpdfrgtjhngfvgbhyujhgfdsawaxcdfvgthyuhgbfvdcsdefrgthyjuhnbfgvdcsa';
   constructor(private formBuilder: FormBuilder, private toastr: ToastrService, public apiservice: ApiService, private formbuilder: FormBuilder, private http: HttpClient, private router: Router) {
- 
   }
  
-  _filterAirports(value: string): any[] {
-    const filterValue = value.toLowerCase();
-    const filtered = this.airports.filter(airport => airport.airport_city.toLowerCase().includes(filterValue));
-    (filtered); // Check if the filtered list is being populated
-    return filtered;
-  }
   ngOnInit(): void {
     this.initializeForm();
     this.handleSelectionModeChanges();
@@ -77,10 +72,9 @@ export class UsersNOCASComponent implements OnInit {
     this.handleAirportNameChanges();
     this.fetchAirports();
     this.showDefaultMap();
+    this.loadAirportData();
     this.requestForm = this.formBuilder.group({
- 
       service2: [false],
- 
     });
   }
  
@@ -143,20 +137,16 @@ export class UsersNOCASComponent implements OnInit {
           airportName: ''
         });
       }
- 
       cityControl?.updateValueAndValidity();
       airportNameControl?.updateValueAndValidity();
     });
   }
  
   handleLatitudeLongitudeChanges() {
-    // Watch for changes in Latitude
     this.TopElevationForm.get('Latitude').valueChanges.subscribe((latitudeDMS: string) => {
       const lat = this.convertDMSStringToDD(latitudeDMS);
       if (lat !== null) {
         this.lat = lat; // Store the latitude value
- 
-        // Update markers position only if longitude is also valid
         if (this.long !== null) {
           this.updateMarkersPosition(this.lat, this.long);
         }
@@ -167,26 +157,19 @@ export class UsersNOCASComponent implements OnInit {
         }
       }
     });
- 
-    // Watch for changes in Longitude
     this.TopElevationForm.get('Longitude').valueChanges.subscribe((longitudeDMS: string) => {
       const lng = this.convertDMSStringToDD(longitudeDMS);
       if (lng !== null) {
         this.long = lng; // Store the longitude value
- 
-        // Update markers position only if latitude is also valid
         if (this.lat !== null) {
           this.updateMarkersPosition(this.lat, this.long);
         }
- 
-        // Update nearest airport data if selectionMode is 'default'
         if (this.TopElevationForm.value.selectionMode === 'default') {
           this.updateNearestAirportData();
         }
       }
     });
   }
- 
  
   handleCityChanges() {
     this.TopElevationForm.get('CITY').valueChanges.subscribe((city: string) => {
@@ -213,35 +196,33 @@ export class UsersNOCASComponent implements OnInit {
       } else {
         this.TopElevationForm.removeControl('airportName');
       }
- 
       const selectedAirport = this.filteredAirports.length === 1 ? this.filteredAirports[0] : null;
       this.selectedAirport = selectedAirport;
       this.selectedAirportName = selectedAirport ? selectedAirport.airport_name : '';
       this.selectedAirportIcao = selectedAirport ? selectedAirport.airport_icao : '';
       this.selectedAirportIATA = selectedAirport ? selectedAirport.airport_iata : '';
- 
-      // Handle GeoJSON loading for the selected city
       this.handleGeoJSONLoading(city);
     });
   }
  
-  onCityChange() {
+  async onCityChange() {
     const selectedCity = this.TopElevationForm.get('CITY')?.value;
     const elevationOptionControl = this.TopElevationForm.get('elevationOption')?.value;
- 
-    // Check if the default elevation option is selected
-    if (elevationOptionControl === 'default') {
-      const elevation = this.getElevationForCity(selectedCity); // Fetch the elevation for the city
-      const defaultElevation = this.feetToMeters(elevation); // Convert to meters if needed
- 
-      // Update the form with the default elevation
-      this.TopElevationForm.patchValue({ Site_Elevation: defaultElevation });
- 
-      // Notify the user
-      // this.toastr.info(`Elevation updated based on the selected city (${selectedCity}).`);
+    if (elevationOptionControl === 'default' && selectedCity) {
+      try {
+        const elevation = await this.getElevationForCity(selectedCity);
+        const defaultElevation = this.feetToMeters(elevation); // Convert to meters if needed
+        this.TopElevationForm.patchValue({ Site_Elevation: defaultElevation });
+        this.toastr.info(`Elevation updated based on the selected city (${selectedCity}).`);
+      } catch (error) {
+        console.error('Error fetching elevation data:', error);
+        this.toastr.error('Failed to fetch or convert elevation data.');
+      }
+    } else if (elevationOptionControl === 'manual') {
+      this.TopElevationForm.patchValue({ Site_Elevation: '' });
     }
   }
- 
+  
  
   handleAirportNameChanges() {
     this.TopElevationForm.get('airportName')?.valueChanges.subscribe((airportName: string) => {
@@ -253,37 +234,29 @@ export class UsersNOCASComponent implements OnInit {
   }
  
   handleGeoJSONLoading(city: string) {
-    const citiesWithGeoJSON = [
-      'Puri', 'Mumbai', 'Coimbatore', 'Ahemdabad', 'Akola', 'Chennai',
-      'Delhi', 'Guwahati', 'Hyderabad', 'Jaipur', 'Nagpur', 'Thiruvananthapuram',
-      'Vadodara', 'Varanasi', 'Agatti', 'Aligarh', 'Ambikapur', 'Amritsar',
-      'Aurangabad', 'Azamgarh', 'Balurghat', 'Baramati', 'Belgaum',
-      'Berhampur', 'Bial', 'Bokaro', 'Cochin', 'Deesa', 'Diburgarh',
-      'Diu', 'Durgapur', 'Gaya', 'Hisar', 'Hubli', 'Imphal', 'Jabalpur',
-      'Jewer', 'Jharsaugada', 'Jogbani', 'Kadapa', 'Kandla', 'Kangra',
-      'Kannur', 'Keshod', 'Khajuraho', 'Kishangarh', 'Kullu', 'Kurnool',
-      'Kushinagar', 'Lalitpur', 'Lilabari', 'Lucknow', 'Ludhiana', 'Mangalore', 'Meerut',
-      'Muzaffarpur', 'Mysore', 'Nanded', 'Pakyong', 'Pantnagar',
-      'Patna', 'Porbandar', 'Rajamundary', 'Rourkela', 'Shirdi',
-      'Sholapur', 'Tiruchirapalli', 'Tirupati', 'Udaipur', 'Utkela',
-      'Vellore', 'Warangal', 'Calicut', 'Agartala', 'Dimapur', 'Kota',
-      'Madurai', 'Kolhapur', 'Kolkata', 'Bhopal', 'Mopa', 'Bhavnagar',
-      'Dehradun', 'Hirsar', 'Jamshedpur', 'Deoghar', 'Donakonda', 'Bengaluru',
-      'Shimla', 'Cooch Behar', 'Bhuvneshwar', 'Tuticorin',
-      'Jeypore', 'Jalgaon', 'Puducherry', 'Raipur', 'Ranchi',
-      'Surat', 'Vijaywada', 'Birlamgram', 'Ayodhya', 'Chitrakoot', 'Ghaziabad', 'Ambala', 'Goa', 'Pune', 'Cimbatore', 'Arakkonnam',
-      'Jodhpur', 'Leh', 'Pathankot', 'Nicobar islands', 'Tezpur',
-      'Thanjavur', 'Agra', 'Kochi', 'Banglore', 'Aizawl', 'Shillong', 'Bilaspur', 'Indore', 'Itanagar', 'Gondia', 'Nashik', 'Jagdalpur', 'Vidyanagar', 'Kalaburagi', 'Moradabad', 'Pithoragarh', 'Rupsi', 'Salem', 'Shivamogga', 'Sindhudurg', 'Tezu', 'Angul', 'Koppal', 'Beas', 'Hosur', 'Raigarh', 'Puttaparthi'
-    ];
-    if (citiesWithGeoJSON.includes(city)) {
-      this.loadGeoJSON(this.map);
-    } else {
-      if (this.geojsonLayer) {
-        this.map.removeLayer(this.geojsonLayer);
-      }
-    }
+    this.apiservice.getAirportData()
+      .subscribe(
+        data => {
+          try {
+            const cityData = data.features.find((feature: { properties: { city: string; }; }) => feature.properties.city === city);
+            if (cityData) {
+              this.loadGeoJSON(this.map, { type: 'FeatureCollection', features: [cityData] });
+            } else {
+              if (this.geojsonLayer) {
+                this.map.removeLayer(this.geojsonLayer);
+              }
+            }
+          } catch (error) {
+            console.error('Error processing GeoJSON data:', error);
+          }
+        },
+        error => {
+          console.error('Error fetching GeoJSON data:', error);
+        }
+      );
   }
- 
+
+
   resetForm() {
     this.TopElevationForm.reset();
     if (this.geojsonLayer) {
@@ -313,7 +286,6 @@ export class UsersNOCASComponent implements OnInit {
     this.marker = L.marker(latLng).addTo(this.map);
   }
  
- 
   showMissingFieldsAlert() {
     const missingFields = [];
     const controls = this.TopElevationForm.controls;
@@ -326,49 +298,38 @@ export class UsersNOCASComponent implements OnInit {
     this.toastr.error(`Missing required fields: ${missingFields.join(', ')}`, 'Form Incomplete');
   }
  
- 
- 
- 
-  findNearestAirport(lat: number, lng: number, radius: number): { airportCity: string; airportName: string; distance: number; elevation: number } | null {
-    const airports = this.airportCoordinatesList;
-    let closestAirport = null;
-    let minDistance = radius;
-    for (const [airportLat, airportLng, airportCity, airportName] of airports) {
-      const distance = this.calculateDistance(lat, lng, airportLat, airportLng);
-      if (distance < minDistance) {
-        closestAirport = {
-          airportCity,
-          airportName,
-          distance,
-          elevation: this.getElevationForCity(airportCity)  // Changed from `this.city` to `airportCity`
-        };
-        minDistance = distance;
-      }
-    }
-    if (closestAirport) {
-      (`Nearest Airport: ${closestAirport.airportName}, Distance: ${closestAirport.distance}`);
-    } else {
-      const selectionMode = this.TopElevationForm.get('selectionMode')?.value;
-      if (selectionMode === 'default') {
-        if (this.geojsonLayer) {
-          this.map.removeLayer(this.geojsonLayer);
-          this.geojsonLayer.clearLayers();
-          this.geojsonLayer = null;
+  loadAirportData() {
+    this.apiservice.getAirportData()
+      .subscribe(
+        data => {
+          if (data.type === 'FeatureCollection' && data.features) {
+            this.airportCoordinatesList = [];
+            data.features.forEach((feature: any) => {
+              if (feature.geometry && feature.geometry.type === 'Point') {
+                const coords = feature.geometry.coordinates as [number, number];
+                const city = feature.properties.city;
+                const airportName = feature.properties.airportName;
+                if (coords.length === 2) {
+                  // Add the airport data to the list
+                  this.airportCoordinatesList.push([coords[1], coords[0], city, airportName]);
+                }
+              } else {
+                console.error('Invalid feature:', feature);
+              }
+            });
+          }
+        },
+        error => {
+          console.error('Error fetching airport data:', error);
         }
-        if (this.marker2) {
-          this.map.removeLayer(this.marker2);
-          this.marker2 = null;
-        }
-        this.toastr.info('No airport found within the specified radius.');
-      }
-    }
-    return closestAirport;
+      );
   }
+  
  
+   
   updateMarkersPosition(lat: number | null, lng: number | null): void {
     this.lat = lat !== null ? lat : this.lat;
     this.long = lng !== null ? lng : this.long;
- 
     this.updateMarkerPosition();
   }
  
@@ -383,42 +344,37 @@ export class UsersNOCASComponent implements OnInit {
       }
     }
   }
-  submitForm() {
+
+  async submitForm() {
     if (!this.apiservice.token) {
       alert('Please Login First');
       this.router.navigate(['UsersLogin']);
       return;
     }
- 
-    // if (!this.TopElevationForm.valid) {
-    //   return;
-    // }
- 
     const selectedAirportCITY = this.TopElevationForm.get('CITY')?.value;
-    const nearestAirport = this.findNearestAirport(this.lat, this.long, 30);
+    const nearestAirport = await this.findNearestAirport(this.lat, this.long, 30);
     const selectionMode = this.TopElevationForm.get('selectionMode')?.value;
-    const selectedAirportGeojsonFilePath = `assets/GeoJson/${selectedAirportCITY}.geojson`;
- 
-    // Check if the selected city has a published GeoJSON map
+    const selectedAirportGeojsonFilePath = `${this.apiservice.baseUrl}/geojson/${selectedAirportCITY}`;
     fetch(selectedAirportGeojsonFilePath)
       .then(response => {
         if (!response.ok) {
           throw new Error(`The selected airport (${selectedAirportCITY}) does not have a published map.`);
         }
-        return response.json();
+        return response.text();
       })
-      .then(() => {
+      .then(encryptedData => {
+        const geoJsonData = this.decryptData(encryptedData);
         if (nearestAirport) {
-          const nearestAirportGeojsonFilePath = `assets/GeoJson/${nearestAirport.airportCity}.geojson`;
- 
+          const nearestAirportGeojsonFilePath = `${this.apiservice.baseUrl}/geojson/${nearestAirport.airportCity}`;
           fetch(nearestAirportGeojsonFilePath)
             .then(response => {
               if (!response.ok) {
                 throw new Error(`GeoJSON file not found for nearest airport (${nearestAirport.airportCity}).`);
               }
-              return response.json();
+              return response.text();
             })
-            .then(() => {
+            .then(encryptedData => {
+              const nearestGeoJsonData = this.decryptData(encryptedData);
               if (nearestAirport.airportCity !== selectedAirportCITY) {
                 const updateConfirmation = confirm(
                   `The selected airport (${selectedAirportCITY}) is different from the nearest airport (${nearestAirport.airportCity}).\n` +
@@ -430,11 +386,10 @@ export class UsersNOCASComponent implements OnInit {
                     Site_Elevation: this.getElevationForCity(nearestAirport.airportCity)
                   });
                   this.selectedAirportName = nearestAirport.airportName;
-                  this.loadNearestAirportGeoJSON(nearestAirport.airportCity, nearestAirport.distance, this.map);
+                  const parsedData = JSON.parse(nearestGeoJsonData); // Validate JSON format
+                  this.loadNearestAirportGeoJSON(nearestAirport.airportCity, nearestAirport.distance, this.map,parsedData);
                 }
               }
- 
-              // Show confirmation only if both selected and nearest airport have valid CCZM maps
               if (selectionMode === 'default' || selectionMode === 'manual' || (nearestAirport && nearestAirport.airportCity === selectedAirportCITY)) {
                 const confirmation = confirm("Kindly confirm that the entered site information is correct or verify.");
                 if (confirmation) {
@@ -446,7 +401,6 @@ export class UsersNOCASComponent implements OnInit {
               }
             })
             .catch(error => {
-              console.error(error);
             });
         } else {
           if (selectionMode !== 'default') {
@@ -457,13 +411,11 @@ export class UsersNOCASComponent implements OnInit {
                 this.showData();
               });
             }
-          } else {
-            // this.toastr.info('No airport found within the specified radius.');
           }
         }
       })
       .catch(error => {
-        console.error(error);
+        console.error('Error fetching selected airport GeoJSON:', error);
         const selectionMode = this.TopElevationForm.get('selectionMode')?.value;
         if (selectionMode === 'manual') {
           Swal.fire({
@@ -471,7 +423,6 @@ export class UsersNOCASComponent implements OnInit {
             icon: 'warning',
           });
         } else if (selectionMode === 'default' && nearestAirport) {
-          ("defrt")
           Swal.fire({
             html: `The nearest airport <span style="color: red;">${nearestAirport.airportCity}</span> does not have a CCZM map published by the authorities. Please contact Cognitive Navigation for further assistance.`,
             icon: 'warning',
@@ -480,115 +431,109 @@ export class UsersNOCASComponent implements OnInit {
       });
   }
  
- 
-  secretKey = 'your-secret-key';
- 
-  // Decrypt data
   decryptData = (encryptedData: string | CryptoJS.lib.CipherParams) => {
     const bytes = CryptoJS.AES.decrypt(encryptedData, this.secretKey);
     return JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
   };
  
- 
- 
-  loadGeoJSON(map : any, zoomLevel = 10) {
+  loadGeoJSON(map: any,geoJsonData:any, zoomLevel = 10) {
     if (!map) {
       console.error("Map object is required to load GeoJSON.");
       return;
     }
- 
-    // Remove existing GeoJSON layer and marker if they exist
     if (this.geojsonLayer) {
       map.removeLayer(this.geojsonLayer);
       this.geojsonLayer.clearLayers();
       this.geojsonLayer = null;
     }
- 
     if (this.marker2) {
       map.removeLayer(this.marker2);
       this.marker2 = null;
     }
- 
-    // Get selected city from the form
     const selectedAirportCITY = this.TopElevationForm.get('CITY')?.value;
-    if (selectedAirportCITY) {
-      const airportData: { [key: string]: { coords: [number, number] } } = {
-        'Akola': { coords: [20.69851583, 77.05776056] },
-        'Mumbai': {coords: [19.09155556, 72.86597222]}
-       
-      };
- 
-      const airportInfo = airportData[selectedAirportCITY];
-      if (airportInfo) {
-        this.airportCoordinates = airportInfo.coords;
-        map.setView(this.airportCoordinates, zoomLevel);
- 
-        // Construct the API URL using the selected airport city
-        const apiUrl = `http://localhost:3001/api/geojson/${selectedAirportCITY}`;
- 
-        // Fetch the encrypted GeoJSON data from the backend API
-        fetch(apiUrl)
-          .then(response => response.text())
-          .then(encryptedData => {
-            const geoJsonData = this.decryptData(encryptedData);
- 
-            const style = (feature:any) => {
-              const color = feature.properties.Color;
-              return { fillColor: color, weight: 2 };
-            };
-            this.geojsonLayer = L.geoJSON(geoJsonData, { style: style }).addTo(map);
-            map.fitBounds(this.geojsonLayer.getBounds());
- 
-            const customIcon = L.icon({
-              iconUrl: 'assets/marker-airport.png',
-              shadowUrl: 'https://opentopomap.org/leaflet/images/marker-shadow.png',
-              iconSize: [40, 41],
-              shadowSize: [40, 41],
-              iconAnchor: [12, 40],
-            });
- 
-            // Remove previous marker if exists
-            if (this.marker2) {
-              map.removeLayer(this.marker2);
-              this.marker2 = null;
-            }
- 
-            this.marker2 = L.marker(this.airportCoordinates, { icon: customIcon }).addTo(map);
-            const popupContent = `ARP:
-              <p>${selectedAirportCITY} Airport</p><br>
-              Latitude: ${this.airportCoordinates[0].toFixed(2)}
-              Longitude: ${this.airportCoordinates[1].toFixed(2)}`;
-            this.marker2.bindPopup(popupContent).openPopup();
- 
-            // Handle other markers (if needed)
-            if (this.marker) {
-              map.removeLayer(this.marker);
-              this.marker = null;
-            }
-            this.marker = L.marker([this.lat, this.long]).addTo(map);
-          })
-          .catch(error => {
-            console.error('Error fetching GeoJSON:', error);
-          });
-      }
-    }
-  }
- 
- updateNearestAirportData() {
-    const nearestAirport = this.findNearestAirport(this.lat, this.long, 30);
-    const selectionMode = this.TopElevationForm.get('selectionMode')?.value;
- 
-    if (!nearestAirport) {
-      // this.toastr.info('Nearest airport data not found.');
+    if (!selectedAirportCITY) {
+      console.error("No city selected.");
       return;
     }
- 
-    const geojsonFilePath = `assets/GeoJson/${nearestAirport.airportCity}.geojson`;
- 
-    // Reset error flag and clear previous messages
+    const airportDataUrl = `${this.apiservice.baseUrl}/airportinfo/airportData`;
+
+    fetch(airportDataUrl)
+      .then(response => response.json())
+      .then((data: any) => {
+        if (data.type === 'FeatureCollection' && data.features) {
+          const airportData: { [key: string]: { coords: [number, number] } } = {};
+          data.features.forEach((feature: any) => {
+            if (feature.geometry.type === 'Point') {
+              const city = feature.properties.city;
+              const coords = feature.geometry.coordinates as [number, number];
+              airportData[city] = { coords };
+            }
+          });
+          const airportInfo = airportData[selectedAirportCITY];
+          if (airportInfo) {
+            this.airportCoordinates = airportInfo.coords;
+            map.setView(this.airportCoordinates, zoomLevel);
+            const geoJsonApiUrl = `${this.apiservice.baseUrl}/geojson/${selectedAirportCITY}`;
+            fetch(geoJsonApiUrl)
+              .then(response => response.text())
+              .then(encryptedData => {
+                const geoJsonData = this.decryptData(encryptedData);
+                if (geoJsonData && geoJsonData.type === 'FeatureCollection') {
+                  const style = (feature: any) => {
+                    const color = feature.properties.Color || '#FF0000'; // Default color if not provided
+                    return { fillColor: color, weight: 2 };
+                  };
+                  this.geojsonLayer = L.geoJSON(geoJsonData, { style: style }).addTo(map);
+                  map.fitBounds(this.geojsonLayer.getBounds());
+                  const customIcon = L.icon({
+                    iconUrl: 'assets/marker-airport.png',
+                    shadowUrl: 'https://opentopomap.org/leaflet/images/marker-shadow.png',
+                    iconSize: [40, 41],
+                    shadowSize: [40, 41],
+                    iconAnchor: [12, 40],
+                  });
+                  if (this.marker2) {
+                    map.removeLayer(this.marker2);
+                    this.marker2 = null;
+                  }
+                  this.marker2 = L.marker(this.airportCoordinates, { icon: customIcon }).addTo(map);
+                  const popupContent = `ARP:
+                    <p>${selectedAirportCITY} Airport</p><br>
+                    Latitude: ${this.airportCoordinates[0].toFixed(2)}
+                    Longitude: ${this.airportCoordinates[1].toFixed(2)}`;
+                  this.marker2.bindPopup(popupContent).openPopup();
+                  if (this.marker) {
+                    map.removeLayer(this.marker);
+                    this.marker = null;
+                  }
+                  this.marker = L.marker([this.lat, this.long]).addTo(map);
+                } else {
+                  console.error('Invalid GeoJSON data:', geoJsonData);
+                }
+              })
+              .catch(error => {
+                console.error('Error fetching GeoJSON:', error);
+              });
+          } else {
+            console.error(`No data found for city: ${selectedAirportCITY}`);
+          }
+        } else {
+          console.error('Invalid airport data:', data);
+        }
+      })
+      .catch(error => {
+        console.error('Error fetching airport data:', error);
+      });
+  }
+  
+ async updateNearestAirportData() {
+    const nearestAirport =await  this.findNearestAirport(this.lat, this.long, 30);
+    const selectionMode = this.TopElevationForm.get('selectionMode')?.value;
+    if (!nearestAirport) {
+      return;
+    }
+    const geojsonFilePath = `${this.apiservice.baseUrl}/geojson/${nearestAirport.airportCity}`;
     this.isGeoJSONNotFound = false;
- 
-    // Remove existing layers and markers
     if (this.nearestAirportGeoJSONLayer) {
       this.map.removeLayer(this.nearestAirportGeoJSONLayer);
       this.nearestAirportGeoJSONLayer = null;
@@ -597,47 +542,37 @@ export class UsersNOCASComponent implements OnInit {
       this.map.removeLayer(this.marker2);
       this.marker2 = null;
     }
- 
     fetch(geojsonFilePath)
       .then(response => {
         if (!response.ok) {
           this.isGeoJSONNotFound = true;
           throw new Error('GeoJSON file not found');
         }
-        return response.json();
+        return response.text(); // Get the encrypted text
       })
-      .then(geojsonData => {
-        this.loadNearestAirportGeoJSON(nearestAirport.airportCity, nearestAirport.distance, this.map);
- 
+      .then(encryptedData => {
+        const geojsonData = this.decryptData(encryptedData); // Decrypt the data  
+        this.loadNearestAirportGeoJSON(nearestAirport.airportCity, nearestAirport.distance, this.map, geojsonData);
         // Update the form if not in manual mode
         if (selectionMode !== 'manual') {
           this.TopElevationForm.patchValue({
             CITY: nearestAirport.airportCity,
             AIRPORT_NAME: nearestAirport.airportName,
-            elevation: this.getElevationForCity(nearestAirport.airportCity)
+            elevation:  this.getElevationForCity(nearestAirport.airportCity)
           });
         }
       })
       .catch(error => {
- 
-        console.error('Error loading GeoJSON file:', error);
       });
   }
- 
-  loadNearestAirportGeoJSON(airportCity: string, distance: number, map: any) {
-    const airportGeoJSONPath = `assets/GeoJson/${airportCity}.geojson`;
- 
-    // Reset the error flag before fetching
+  
+  loadNearestAirportGeoJSON(airportCity: string, distance: number, map: any, geojsonData: any) {
+    const airportGeoJSONPath = `${this.apiservice.baseUrl}/geojson/${airportCity}`;
     this.isGeoJSONNotFound = false;
- 
-    // Ensure that fetching is handled safely to avoid triggering errors
     if (this.isFetchingGeoJSON) {
       return;
     }
- 
     this.isFetchingGeoJSON = true;
- 
-    // Remove existing layers and markers
     if (this.nearestAirportGeoJSONLayer) {
       map.removeLayer(this.nearestAirportGeoJSONLayer);
       this.nearestAirportGeoJSONLayer = null;
@@ -646,60 +581,35 @@ export class UsersNOCASComponent implements OnInit {
       map.removeLayer(this.marker2);
       this.marker2 = null;
     }
- 
     map.eachLayer((layer: any) => {
       if (layer instanceof L.GeoJSON) {
         map.removeLayer(layer);
       }
     });
- 
-    fetch(airportGeoJSONPath)
-      .then(response => {
-        if (!response.ok) {
-          this.isGeoJSONNotFound = true;
-          throw new Error('GeoJSON file not found');
-        }
-        return response.json();
-      })
-      .then(geojsonData => {
-        const features = geojsonData.features;
-        const style = (feature: any) => {
-          const color = feature.properties.Color;
-          return { fillColor: color, weight: 1 };
-        };
-        const geojsonLayer = L.geoJSON(features, { style: style });
-        geojsonLayer.addTo(map);
-        this.nearestAirportGeoJSONLayer = geojsonLayer;
- 
-        const selectionMode = this.TopElevationForm.get('selectionMode')?.value;
-        if (selectionMode === 'default') {
-          this.TopElevationForm.patchValue({
-            CITY: airportCity,
-            AIRPORT_NAME: features[0].properties.AirportName
-          });
-        }
- 
-        this.marker2 = L.marker([features[0].geometry.coordinates[1], features[0].geometry.coordinates[0]]).addTo(map);
-        const popupContent = `ARP:
-        <p>${airportCity} Airport</p><br>
-        Latitude: ${features[0].geometry.coordinates[1].toFixed(2)}
-        Longitude: ${features[0].geometry.coordinates[0].toFixed(2)}`;
-        this.marker2.bindPopup(popupContent).openPopup();
-      })
-      .catch(error => {
-        if (this.isGeoJSONNotFound) {
-          Swal.fire({
-            html: `The <span style="color: red;">${airportCity}</span> airport does not have a published CCZM map. Please contact Cognitive Navigation for further assistance.`,
-            icon: 'warning',
-          });
-        }
-        console.error("Error fetching GeoJSON data:", error);
-      })
-      .finally(() => {
-        this.isFetchingGeoJSON = false;
+    const features = geojsonData.features;
+    const style = (feature: any) => {
+      const color = feature.properties.Color;
+      return { fillColor: color, weight: 1 };
+    };
+    const geojsonLayer = L.geoJSON(features, { style: style });
+    geojsonLayer.addTo(map);
+    this.nearestAirportGeoJSONLayer = geojsonLayer;
+    const selectionMode = this.TopElevationForm.get('selectionMode')?.value;
+    if (selectionMode === 'default') {
+      this.TopElevationForm.patchValue({
+        CITY: airportCity,
+        AIRPORT_NAME: features[0].properties.AirportName
       });
+    }
+    this.marker2 = L.marker([features[0].geometry.coordinates[1], features[0].geometry.coordinates[0]]).addTo(map);
+    const popupContent = `ARP:
+    <p>${airportCity} Airport</p><br>
+    Latitude: ${features[0].geometry.coordinates[1].toFixed(2)}
+    Longitude: ${features[0].geometry.coordinates[0].toFixed(2)}`;
+    this.marker2.bindPopup(popupContent).openPopup();
+    this.isFetchingGeoJSON = false;
   }
- 
+  
   navigateToContact() {
     this.router.navigate(['/request-Service']);
   }
@@ -741,7 +651,6 @@ export class UsersNOCASComponent implements OnInit {
     let seconds = ((absolute - degrees - minutes / 60) * 3600).toFixed(2)
     seconds = parseFloat(seconds).toString();
     const direction = (isLatitude ? (dd >= 0 ? 'N' : 'S') : (dd >= 0 ? 'E' : 'W'));
- 
     return `${degrees}°${minutes}'${seconds}"${direction}`;
   }
  
@@ -764,47 +673,62 @@ export class UsersNOCASComponent implements OnInit {
   }
  
   handlePayment() {
-    const RozarpayOptions = {
-      key: 'rzp_test_IScA4BP8ntHVNp',
-      // key: 'rzp_live_7iwvKtQ79rijv2',
-      amount: 50 * 100,
+    const baseAmount = 95; // Base amount without GST
+    const gstRate = 0.18; // GST rate (18%)
+    const gstAmount = baseAmount * gstRate; // Calculate GST
+    const totalAmount = baseAmount + gstAmount; // Total amount with GST
+  
+    // Round the total amount to avoid decimals and convert it to paise for Razorpay
+    const totalAmountRounded = Math.round(totalAmount);
+  
+    console.log(`Base Amount: ₹${baseAmount}, GST: ₹${gstAmount}, Total Amount: ₹${totalAmountRounded}`);
+  
+    const RazorpayOptions = {
+      // key: 'rzp_test_IScA4BP8ntHVNp',
+      key: 'rzp_live_7iwvKtQ79rijv2',
+      amount: totalAmountRounded * 100, // Razorpay amount in paise (multiplied by 100)
       currency: 'INR',
       name: 'Cognitive Navigation Pvt. Ltd',
-      description: ` Plan Subscription`,
-      image: 'https://imgur.com/a/J4UAMhv',
+      description: `Plan Subscription`,
+      image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQZ4mHCqV6RQTwJIAON-ZK6QN9rdxF4YK_fLA&s',
       handler: (response: any) => {
         this.router.navigate(['TransactionDetails']);
+        
         const paymentDetails = {
           user_id: this.apiservice.userData.id,
           subscription_type: 'OneTime',
-          price: 50,
+          price: totalAmountRounded, // Use total amount with GST
           razorpay_payment_id: response.razorpay_payment_id,
           expiry_date: new Date().toISOString(),
         };
+  
         const headers = new HttpHeaders().set("Authorization", `Bearer ${this.apiservice.token}`);
         let url = this.apiservice.baseUrl + '/subscription/addSubscription';
-        this.apiservice.http.post<any>(url,paymentDetails, { headers: headers })
-        //  this.http.post('http://localhost:3001/api/subscription/addSubscription', paymentDetails, { headers: headers })
+  
+        this.apiservice.http.post<any>(url, paymentDetails, { headers: headers })
           .subscribe(
             (result: any) => {
-              this.createNocas(result.subscription_id)
+              this.createNocas(result.subscription_id);
             },
             (error: any) => {
               console.error('Error storing payment details:', error);
             }
           );
+  
         const confirmation = confirm("Payment Successfully Done. If you want to see payment details, please go to Transaction Details page");
         if (confirmation) {
-          this.isSubscribed = true
+          this.isSubscribed = true;
         }
         this.router.navigate(['C_NOCAS-MAP']);
+        
         const airportCITY = this.TopElevationForm.get('CITY')?.value;
         const latitude = parseFloat(this.TopElevationForm.get('Latitude')?.value);
         const longitude = parseFloat(this.TopElevationForm.get('Longitude')?.value);
+  
         if (airportCITY && !isNaN(latitude) && !isNaN(longitude)) {
           this.updateMarkerPosition();
           this.displayMapData(latitude, longitude, this.airportCoordinates);
-          this.closeModal('airportModal')
+          this.closeModal('airportModal');
         }
       },
       theme: {
@@ -814,308 +738,62 @@ export class UsersNOCASComponent implements OnInit {
         external: ['upi']
       }
     };
-    const rzp = new Razorpay(RozarpayOptions);
+  
+    const rzp = new Razorpay(RazorpayOptions);
     rzp.open();
+  
     rzp.on('payment.success', (response: any) => {
+      console.log("Payment success:", response);
     });
+  
     rzp.on('payment.error', (error: any) => {
       alert("Payment Failed");
+      console.error("Payment error:", error);
     });
   }
+  
  
-  airportCoordinatesList: Array<[number, number, string, string]> = [
-    [19.79, 85.75, 'Puri', 'PURI AIRPORT/Puri/BBI'],
-    [19.09155556, 72.86597222, 'Mumbai', 'Chhatrapati Shivaji Maharaj International Airport/Mumbai/BOM'],
-    [11.02691111, 77.04180278, 'Coimbatore', 'Coimbatore Airport/Coimbatore/CJB'],
-    [23.07119167, 72.62643333, 'Ahemdabad', 'Sardar Vallabhbhai Patel International Airport/Ahemdabad/AMD'],
-    [20.69851583, 77.05776056, 'Akola', 'Akola Airport/Akola/AKD'],
-    [12.99510000, 80.17360278, 'Chennai', 'Chennai International Airport/Chennai/MAA'],
-    [28.61, 77.20, 'Delhi', 'Indira Gandhi International Airport/Delhi/DEL'],
-    [26.10502222, 91.58543889, 'Guwahati', 'Lokpriya Gopinath Bordoloi International Airport/Guwahati/GAU'],
-    [17.24055556, 78.42888889, 'Hyderabad', 'Rajiv Gandhi International Airport/Hyderabad/HYD'],
-    [26.82417278, 75.80247833, 'Jaipur', 'Jaipur International Airport/Jaipur/JAI'],
-    [21.09172500, 79.04819722, 'Nagpur', 'Dr. Babasaheb Ambedkar International Airport/Nagpur/NAG'],
-    [8.49319444, 76.90915833, 'Thiruvananthapuram', 'Trivandrum International Airport/Thiruvananthapuram/TRV'],
-    [22.33004167, 73.21884444, 'Vadodara', 'Vadodara Airport/Vadodara/BDQ'],
-    [25.45121111, 82.85860556, 'Varanasi', 'Lal Bahadur Shastri International Airport/Varanasi/VNS'],
-    [10.82421944, 72.17663611, 'Agatti', 'Agatti Airport/Agatti Island/AGX'],
-    [27.86130000, 78.14706944, 'Aligarh', 'Aligarh Airport/Aligarh/IXC'],
-    [22.99345833, 83.19275222, 'Ambikapur', 'Ambikapur Airport/Ambikapur/VER'],
-    [31.71059167, 74.80015556, 'Amritsar', 'Sri Guru Ram Dass Jee International Airport/Amritsar/ATQ'],
-    [19.86439444, 75.39756111, 'Aurangabad', 'Aurangabad Airport/Aurangabad/IXU'],
-    [26.15734917, 83.11402361, 'Azamgarh', 'Azamgarh Airport/Azamgarh/AZH'],
-    [25.26355000, 88.79562750, 'Balurghat', 'Balurghat Airport/Balurghat/RGH'],
-    [18.22662222, 74.58969722, 'Baramati', 'Baramati Airport/Baramati/'],
-    [15.85840278, 74.61769167, 'Belgaum', 'Belgaum Airport/Belgaum/IXG'],
-    [19.29156278, 84.87916861, 'Berhampur', 'Berhampur Airport/Berhampur/QBM'],
-    [13.19887167, 77.70547778, 'Bial', 'Kempegowda International Airport/Bial/BLR'],
-    [23.64352944, 86.14964472, 'Bokaro', 'Bokaro Airport/Bokaro/'],
-    [10.15, 76.40, 'Cochin', 'Cochin International Airport/Cochin/COK'],
-    [24.26777778, 72.20277778, 'Deesa', 'Deesa Airport/Deesa/DDD'],
-    [27.48231111, 95.01706389, 'Diburgarh', 'Diburgarh Airport/Diburgarh/DBG'],
-    [20.71379444, 70.92288056, 'Diu', 'Diu Airport/Diu/DIU'],
-    [23.62444444, 87.24250000, 'Durgapur', 'Durgapur Airport/Durgapur/DGR'],
-    [24.74803889, 84.94243611, 'Gaya', 'Gaya Airport/Gaya/GAY'],
-    [15.36183889, 75.08436667, 'Hubli', 'Hubli Airport/Hubli/HDI'],
-    [24.76431667, 93.89963889, 'Imphal', 'Imphal Airport/Imphal/IMF'],
-    [23.18337222, 80.06044444, 'Jabalpur', 'Jabalpur Airport/Jabalpur/JLR'],
-    [28.17561111, 77.60624167, 'Jewar', 'Jewar Airport/Jewar/JEW'],
-    [21.91481944, 84.04869167, 'Jharsaugada', 'Veer Surendra Sai Airport/Jharsaugada/JRG'],
-    [26.29618056, 87.28654722, 'Jogbani', 'Jogbani Airport/Jogbani/JGN'],
-    [14.51304722, 78.77219167, 'Kadapa', 'Kadapa Airport/Kadapa/KDP'],
-    [23.11220000, 70.10056667, 'Kandla', 'Kandla Airport/Kandla/IXY'],
-    [32.16473611, 76.26215556, 'Kangra', 'Kangra Airport/Kangra/DHM'],
-    [11.91573056, 75.54572222, 'Kannur', 'Kannur International Airport/Kannur/CCJ'],
-    [21.31498889, 70.26913889, 'Keshod', 'Keshod Airport/Keshod/KSD'],
-    [24.81983056, 79.91857500, 'Khajuraho', 'Khajuraho Airport/Khajuraho/KUR'],
-    [26.60125, 74.81415, 'Kishangarh', 'Kishangarh Airport/Kishangarh/KQH'],
-    [31.87681389, 77.15525833, 'Kullu', 'Kullu Airport/Kullu/KUU'],
-    [15.71475556, 78.16298611, 'Kurnool', 'Kurnool Airport/Kurnool/KJB'],
-    [26.77277778, 83.89527778, 'Kushinagar', 'Kushinagar Airport/Kushinagar/KUN'],
-    [24.71647083, 78.41612444, 'Lalitpur', 'Lalitpur Airport/Lalitpur/LTP'],
-    [27.29122778, 94.09352778, 'Lilabari', 'Lilabari Airport/Lilabari/LLB'],
-    [26.76185278, 80.88342778, 'Lucknow', 'Chaudhary Charan Singh International Airport/Lucknow/LKO'],
-    [30.90, 75.85, 'Ludhiana', 'Ludhiana Airport/Ludhiana/UDN'],
-    [12.96206111, 74.88978611, 'Mangalore', 'Mangalore Airport/Mangalore/IXE'],
-    [28.90489833, 77.67712167, 'Meerut', 'Meerut Airport/Meerut/MRT'],
-    [26.12, 85.38, 'Muzaffarpur', 'Muzaffarpur Airport/Muzaffarpur/MUZ'],
-    [12.30, 76.65, 'Mysore', 'Mysore Airport/Mysore/IXM'],
-    [19.18103861, 77.32254722, 'Nanded', 'Nanded Airport/Nanded/NAN'],
-    [27.13, 88.61, 'Pakyong', 'Pakyong Airport/Pakyong/PYK'],
-    [29.03214722, 79.47246944, 'Pantnagar', 'Pantnagar Airport /Pantnagar/PGH'],
-    [25.59361111, 85.09183333, 'Patna', 'Jay Prakash Narayan International Airport/Patna/PAT'],
-    [21.65034583, 69.65880028, 'Porbandar', 'Porbandar Airport/Porbandar/PBD'],
-    [17.10944444, 81.81944444, 'Rajamundary', 'Rajamundary Airport/Rajamundary/'],
-    [22.25623889, 84.81460833, 'Rourkela', 'Rourkela Airport/Rourkela/ROK'],
-    [19.69083333, 74.37166667, 'Shirdi', 'Shirdi Airport/Shirdi/SHD'],
-    [17.62765278, 75.93403889, 'Sholapur', 'Sholapur Airport/Sholapur/SOL'],
-    [10.765, 78.710, 'Tiruchirapalli', 'Tiruchirapalli International Airport/Tiruchirapalli/TRZ'],
-    [13.63296389, 79.54190833, 'Tirupati', 'Tirupati Airport/Tirupati/TIR'],
-    [24.61754056, 73.89445972, 'Udaipur', 'Maharana pratap Airport/Udaipur/UDR'],
-    [20.09765028, 83.18355250, 'Utkela', 'Utkela Airport/Utkela/UTK'],
-    [12.90810639, 79.06714361, 'Vellore', 'Vellore Airport/Vellore/VEL'],
-    [17.91703361, 79.59933194, 'Warangal', 'Warangal Airport/Warangal/WAR'],
-    [11.13785000, 75.95057222, 'Calicut', 'Calicut Airport/Calicut/CCJ'],
-    [23.89055556, 91.23916667, 'Agartala', 'Agartala Airport/Agartala/IXA'],
-    [25.88345756, 93.77135750, 'Dimapur', 'Dimapur Airport/Dimapur/DIP'],
-    [25.16008333, 75.84783333, 'Kota', 'Kota Airport/Kota/KTU'],
-    [9.83500000, 78.08861111, 'Madurai', 'Madurai Airport/Madurai/IXM'],
-    [16.66637222, 74.29048056, 'Kolhapur', 'Kolhapur Airport/Kolhapur/KLH'],
-    [22.65473944, 88.44672222, 'Kolkata', 'Netaji Subhas Chandra Bose International Airport/Kolkata/CCU'],
-    [23.28691944, 77.33696389, 'Bhopal', 'Raja Bhoj Airport/Bhopal/BHO'],
-    [15.74249889, 73.86701028, 'Mopa', 'Manohar International Airport/Mopa/MOP'],
-    [21.75425139, 72.19052528, 'Bhavnagar', 'Bhavnagar Airport/Bhavnagar/BHU'],
-    [30.19063056, 78.18222222, 'Dehradun', 'Dehradun Airport/Dehradun/DED'],
-    [29.1833, 75.7167, 'Hirsar', 'Hirsar Airport/Hirsar/HSR'],
-    [29.15, 75.73, 'Hisar', 'Hisar Airport/Hisar/HSR'],
-    [22.81455417, 86.16901472, 'Jamshedpur', 'Sonari Airport/Jamshedpur/IXW'],
-    [24.44637500, 86.71666667, 'Deoghar', 'Deoghar Airport/Deoghar/'],
-    [15.82472167, 79.48233389, 'Donakonda', 'Donakonda Airport/Donakonda/DND'],
-    [31.08158083, 77.06767694, 'Shimla', 'Shimla Airport/Shimla/'],
-    [26.32965556, 89.46711389, 'Cooch Behar', 'Cooch Behar Airport/Cooch Behar/COH'],
-    [20.26420972, 85.80248556, 'Bhuvneshwar', 'Biju Patnaik International Airport/Bhuvneshwar/BBI'],
-    [8.72229167, 78.02617500, 'Tuticorin', 'Tuticorin Airport/Tuticorin/TCR'],
-    [13.19887167, 77.70547778, 'Bengaluru', 'Kempegowda International Airport/Bengaluru/BLR'],
-    [18.88055558, 82.55361111, 'Jeypore', 'Jeypore Airport/Jeypore/JYP'],
-    [20.96130556, 75.62459722, 'Jalgaon', 'Jalgaon Airport/Jalgaon/JLG'],
-    [11.96731944, 79.81143056, 'Puducherry', 'Puducherry Airport/Puducherry/PDY'],
-    [21.18100056, 81.73859194, 'Raipur', 'Raipur Airport/Raipur/RPR'],
-    [23.31416667, 85.32111111, 'Ranchi', 'Birsa Munda Airport/Ranchi/IXR'],
-    [21.11604444, 72.74181944, 'Surat', 'Surat Airport/Surat/STV'],
-    [16.533597, 80.803283, 'Vijaywada', 'Vijaywada Airport/Vijaywada/VGA'],
-    [23.45, 75.416667, 'Birlamgram', 'Birlamgram Airport/Birlamgram/'],
-    [26.7980, 82.2080, 'Ayodhya', 'Ayodhya Airport/Ayodhya/AYD'],
-    [25.2320, 80.8250, 'Chitrakoot', 'Chitrakoot Airport/Chitrakoot/CKU'],
- 
-    [28.707778, 77.358333, 'Ghaziabad', 'Hindon Air Force/Ghaziabad/HDO'],
-    [30.370833, 76.817778, 'Ambala', 'Ambala Air Force/Ambala/'],
-    [15.3725, 73.831389, 'Goa', 'INS Hansa/Goa/'],
-    [18.582222, 73.919722, 'Pune', 'Lohegaon Air Force/Pune/PNQ'],
-    [11.013611, 77.159722, 'Cimbatore', 'Sulur Air Force/Cimbatore/'],
-    [13.071111, 79.691111, 'Arakkonnam', 'INS Rajali/Arakkonnam/'],
-    [26.257222, 73.051667, 'Jodhpur', 'Jodhpur Air Force/Jodhpur/JDH'],
-    [34.135833, 77.545278, 'Leh', 'Leh Airport/Leh/IXL'],
-    [32.233611, 75.634444, 'Pathankot', 'Pathankot Air Force/Pathankot/IXP'],
-    [9.1525, 92.819722, 'Nicobar islands', 'Car Nicobar Air Force/Nicobar islands/CBD'],
-    [26.712222, 92.787222, 'Tezpur', 'Tezpur Air Force/Tezpur/TEZ'],
-    [10.722222, 79.101389, 'Thanjavur', 'Thanjavur Air Force/Thanjavur/TJV'],
-    [27.161832, 77.970727, 'Agra', 'Agra Airport/Agra/AGR'],
-    [9.940000, 76.275000, 'Kochi', 'INS Garuda/Kochi/INS'],
-    [13.135833, 77.607500, 'Banglore', 'Yelahanka Air Force/Banglore/'],
-    [23.2551083, 92.6203583, 'Aizawl', 'Lengpui Airport/Aizawl/LGU'],
-    [25.70361111, 91.97861111, 'Shillong', 'Barapani Airport/Shillong/SHL'],
-    [21.98833333, 82.11111111, 'Bilaspur', 'Bilaspur Airport/Bilaspur/PAB'],
-    [23.72166667, 75.80083333, 'Indore', 'Devi Ahilya Bai Holkar Airport/Indore/IDR'],
-    [26.9718, 93.6423, 'Itanagar', 'Donyi Polo Airport/Itanagar/ITE'],
-    [21.52555556, 80.28916667, 'Gondia', 'Gondia Airport/Gondia/GOV'],
-    [20.1194444, 73.9136111, 'Nashik', 'HAL Ozar Airport/Nashik/ISK'],
-    [19.07444444, 82.03694444, 'Jagdalpur', 'Jagdalpur Airport/Jagdalpur/JGB'],
-    [15.175, 73.6341, 'Vidyanagar', 'Jindal Vijayanagar Airport/Vidyanagar/VDY'],
-    [17.30777778, 76.95805556, 'Kalaburagi', 'Kalaburagi Airport/Kalaburagi/KBX'],
-    [28.81944444, 78.92333333, 'Moradabad', 'Moradabad Airport/Moradabad/MOR'],
-    [29.5924583, 80.241775, 'Pithoragarh', 'Naini-Saini Airport/Pithoragarh/PGH'],
-    [26.14111111, 89.90666667, 'Rupsi', 'Rupsi Airport/Rupsi/RUP'],
-    [11.7819444, 78.0644444, 'Salem', 'Salem Airport/Salem/SXV'],
-    [13.85472222, 75.61055556, 'Shivamogga', 'Shivamogga Airport/Shivamogga/SIX'],
-    [16.0, 73.5333333, 'Sindhudurg', 'Sindhudurg Airport/Sindhudurg/SID'],
-    [27.9422, 96.1339, 'Tezu', 'Tezu Airport/Tezu/TEZ'],
-    [20.9105556, 85.0352778, 'Angul', 'Angul Airport/Angul/ANJ'],
-    [15.3593111, 76.2192, 'Koppal', 'Baldota Koppal Airport/Koppal/KLP'],
-    [31.5605556, 75.3411111, 'Beas', 'Beas Airport/Beas/BEX'],
-    [12.6611111, 77.7669444, 'Hosur', 'Hosur Airport/Hosur/HOS'],
-    [21.8238889, 83.3602778, 'Raigarh', 'JSPL Raigarh Airport/Raigarh/RIG'],
-    [14.1491667, 77.7911111, 'Puttaparthi', 'Sri Satya Sai Airport/Puttaparthi/PXI']
- 
-  ];
- 
-  getElevationForCity(city: string): number {
- 
-    const cityElevationMap: { [key: string]: number } = {
-      'Puri': this.feetToMeters(0),
-      'Mumbai': this.feetToMeters(40),
-      'Coimbatore': this.feetToMeters(10),
-      'Ahemdabad': this.feetToMeters(189),
-      'Akola': this.feetToMeters(0),
-      'Chennai': this.feetToMeters(54),
-      'Delhi': this.feetToMeters(778),
-      'Guwahati': this.feetToMeters(163),
-      'Hyderabad': this.feetToMeters(0),
-      'Jaipur': this.feetToMeters(1268),
-      'Nagpur': this.feetToMeters(1033),
-      'Thiruvananthapuram': this.feetToMeters(17),
-      'Vadodara': this.feetToMeters(131),
-      'Varanasi': this.feetToMeters(270),
-      'Agatti': this.feetToMeters(12),
-      'Aligarh': 0,
-      'Ambikapur': 0,
-      'Amritsar': this.feetToMeters(760),
-      'Aurangabad': this.feetToMeters(1917),
-      'Azamgarh': 0,
-      'Balurghat': 0,
-      'Baramati': 0,
-      'Belgaum': 0,
-      'Berhampur': 0,
-      'Bial': this.feetToMeters(0),
-      'Bokaro': 0,
-      'Cochin': this.feetToMeters(30),
-      'Deesa': 0,
-      'Dibrugarh': this.feetToMeters(360),
-      'Diu': this.feetToMeters(0),
-      'Durgapur': this.feetToMeters(302),
-      'Gaya': this.feetToMeters(383),
-      'Hisar': this.feetToMeters(701),
-      'Hubli': this.feetToMeters(2195),
-      'Imphal': this.feetToMeters(2544),
-      'Jabalpur': this.feetToMeters(1626),
-      'Jewar': 0,
-      'Jharsaugada': this.feetToMeters(757),
-      'Jogbani': 0,
-      'Kadapa': this.feetToMeters(444),
-      'Kandla': this.feetToMeters(97),
-      'Kangra': this.feetToMeters(2527),
-      'Kannur': this.feetToMeters(344),
-      'Keshod': this.feetToMeters(168),
-      'Khajuraho': this.feetToMeters(731),
-      'Kishangarh': this.feetToMeters(1478),
-      'Kullu': this.feetToMeters(3571),
-      'Kurnool': this.feetToMeters(1129),
-      'Kushinagar': this.feetToMeters(263),
-      'Lalitpur': this.feetToMeters(0),
-      'Lilabari': this.feetToMeters(331),
-      'Lucknow': this.feetToMeters(406),
-      'Ludhiana': this.feetToMeters(0),
-      'Mangalore': this.feetToMeters(318),
-      'Meerut': this.feetToMeters(0),
-      'Muzaffarpur': this.feetToMeters(0),
-      'Mysore': this.feetToMeters(2397),
-      'Nanded': this.feetToMeters(0),
-      'Pakyong': this.feetToMeters(0),
-      'Pantnagar': this.feetToMeters(772),
-      'Patna': this.feetToMeters(175),
-      'Porbandar': this.feetToMeters(26),
-      'Rajahmundry': this.feetToMeters(156),
-      'Rourkela': this.feetToMeters(673),
-      'Shirdi': this.feetToMeters(1938),
-      'Sholapur': this.feetToMeters(0),
-      'Tiruchirapalli': this.feetToMeters(0),
-      'Tirupati': this.feetToMeters(352),
-      'Udaipur': this.feetToMeters(1690),
-      'Utkela': this.feetToMeters(0),
-      'Vellore': this.feetToMeters(0),
-      'Warangal': this.feetToMeters(0),
-      'Calicut': this.feetToMeters(343),
-      'Agartala': this.feetToMeters(56),
-      'Dimapur': this.feetToMeters(493),
-      'Kota': this.feetToMeters(0),
-      'Madurai': this.feetToMeters(466),
-      'Kolhapur': this.feetToMeters(2001),
-      'Kolkata': this.feetToMeters(0),
-      'Bhopal': this.feetToMeters(1721),
-      'Mopa': this.feetToMeters(564),
-      'Bhavnagar': this.feetToMeters(43),
-      'Dehradun': this.feetToMeters(1857),
-      'Hirsar': this.feetToMeters(0),
-      'Jamshedpur': this.feetToMeters(481),
-      'Deoghar': this.feetToMeters(802),
-      'Donakonda': this.feetToMeters(0),
-      'Shimla': this.feetToMeters(5073),
-      'Cooch Behar': this.feetToMeters(141),
-      'Bhubaneswar': this.feetToMeters(141),
-      'Tuticorin': this.feetToMeters(85),
-      'Bengaluru': this.feetToMeters(3002),
-      'Jeypore': this.feetToMeters(0),
-      'Jalgaon': this.feetToMeters(842),
-      'Puducherry': this.feetToMeters(141),
-      'Raipur': this.feetToMeters(1044),
-      'Ranchi': this.feetToMeters(2150),
-      'Surat': this.feetToMeters(25),
-      'Vijaywada': this.feetToMeters(83),
-      'Birlagram': 0,
-      'Ayodhya': this.feetToMeters(329),
-      'Chitrakoot': this.feetToMeters(0),
-      'Ghaziabad': this.feetToMeters(200),
-      'Ambala': this.feetToMeters(275),
-      'Goa': this.feetToMeters(15),
-      'Pune': this.feetToMeters(560),
-      'Cimbatore': this.feetToMeters(410),
-      'Arakkonnam': this.feetToMeters(75),
-      'Jodhpur': this.feetToMeters(230),
-      'Leh': this.feetToMeters(3500),
-      'Pathankot': this.feetToMeters(300),
-      'Nicobar islands': this.feetToMeters(1),
-      'Tezpur': this.feetToMeters(70),
-      'Thanjavur': this.feetToMeters(60),
-      'Agra': this.feetToMeters(171),
-      'Kochi': this.feetToMeters(2),
-      'Banglore': this.feetToMeters(920),
-      'Aizawl': this.feetToMeters(1390),
-      'Shillong': this.feetToMeters(2900),
-      'Bilaspur': this.feetToMeters(899),
-      'Indore': this.feetToMeters(1850),
-      'Itanagar': this.feetToMeters(390),
-      'Gondia': this.feetToMeters(1000),
-      'Nashik': this.feetToMeters(2000),
-      'Jagdalpur': this.feetToMeters(1800),
-      'Vidyanagar': this.feetToMeters(510),
-      'Kalaburagi': this.feetToMeters(1562),
-      'Moradabad': this.feetToMeters(615),
-      'Pithoragarh': this.feetToMeters(5000),
-      'Rupsi': this.feetToMeters(127),
-      'Salem': this.feetToMeters(968),
-      'Shivamogga': this.feetToMeters(1847),
-      'Sindhudurg': this.feetToMeters(0),
-      'Tezu': this.feetToMeters(710),
-      'Angul': this.feetToMeters(690),
-      'Koppal': this.feetToMeters(1635),
-      'Beas': this.feetToMeters(750),
-      'Hosur': this.feetToMeters(2900),
-      'Raigarh': this.feetToMeters(750),
-      'Puttaparthi': this.feetToMeters(1600)
-    };
-    return cityElevationMap[city] || 0;
+  async findNearestAirport(lat: number, lng: number, radius: number): Promise<{ airportCity: string; airportName: string; distance: number; elevation: number } | null> {
+    const airports = this.airportCoordinatesList;
+    let closestAirport = null;
+    let minDistance = radius;
+    for (const [airportLng, airportLat, airportCity, airportName] of airports) {
+      const distance = this.calculateDistance(lat, lng, airportLat, airportLng);
+      if (distance < minDistance) {
+        const elevation = await this.getElevationForCity(airportCity);
+        closestAirport = {
+          airportCity,
+          airportName,
+          distance,
+          elevation,
+        };
+        minDistance = distance;
+      }
+    }
+    return closestAirport;
   }
- 
-feetToMeters(feet: number): number {
+  
+  async getElevationForCity(city: string): Promise<number> {
+    const apiEndpoint = `${this.apiservice.baseUrl}/airportinfo/airportData`;
+    try {
+      const response = await fetch(apiEndpoint);
+      if (!response.ok) {
+        throw new Error('Failed to fetch airport data');
+      }
+      const geoJsonData = await response.json();
+      const feature = geoJsonData.features.find((f: any) => f.properties.city === city);
+      if (feature) {
+        return this.feetToMeters(feature.properties.siteElevation);
+      } else {
+        throw new Error('City not found in the GeoJSON data');
+      }
+    } catch (error) {
+      console.error('Error fetching elevation data:', error);
+      return 0; // Return a default value or handle the error as needed
+    }
+  }
+  
+  feetToMeters(feet: number): number {
     return feet * 0.3048;
   }
  
@@ -1133,29 +811,66 @@ feetToMeters(feet: number): number {
     }
   }
  
-  onElevationOptionChange() {
+  async onElevationOptionChange() {
     const elevationOption = this.TopElevationForm.get('elevationOption')?.value;
     const selectedCity = this.TopElevationForm.get('CITY')?.value;
- 
     if (elevationOption === 'default' && selectedCity) {
-      const elevation = this.getElevationForCity(selectedCity);
-      const defaultElevation = this.feetToMeters(elevation);
-      this.TopElevationForm.patchValue({ Site_Elevation: defaultElevation });
- 
-      // this.toastr.info(`Elevation updated based on the selected city (${selectedCity}).`);
+      try {
+        const elevation = await this.getElevationForCity(selectedCity);
+        const defaultElevation = this.feetToMeters(elevation); // Convert to meters if needed
+        this.TopElevationForm.patchValue({ Site_Elevation: defaultElevation });
+        this.toastr.info(`Elevation updated based on the selected city (${selectedCity}).`);
+      } catch (error) {
+        console.error('Error fetching elevation data:', error);
+        this.toastr.error('Failed to fetch or convert elevation data.');
+      }
     } else if (elevationOption === 'manual') {
-      // Optionally, you can clear or set a default value
       this.TopElevationForm.patchValue({ Site_Elevation: '' });
     }
   }
- 
- 
+  
   async createNocas(subscription_id: string = "") {
     if (this.TopElevationForm.valid) {
- 
       const screenshotPath = await this.captureScreenshot();
-      const lat = parseFloat(this.TopElevationForm.value.Latitude); const lng = parseFloat(this.TopElevationForm.value.Longitude); const distance = this.calculateDistance(this.lat, this.long, this.airportCoordinates[0], this.airportCoordinates[1]); const clickedFeature = this.geojsonLayer.getLayers().find((layer: any) => { return layer.getBounds().contains([lat, lng]); }); let elevation = 0; let permissibleHeight = 0; if (clickedFeature) { const properties = clickedFeature.feature.properties; elevation = parseFloat(properties.name); permissibleHeight = elevation - parseFloat(this.TopElevationForm.get('Site_Elevation').value); } const requestBody = { user_id: this.apiservice.userData.id, distance: this.insideMapData?.newDistance || (distance.toFixed(2)), permissible_elevation: this.insideMapData?.elevation + "" || elevation + "", permissible_height: this.insideMapData?.permissibleHeight || (permissibleHeight < 0 ? '-' : Math.abs(permissibleHeight).toFixed(2)), city: this.TopElevationForm.value.CITY, latitude: this.insideMapData?.latitudeDMS || this.latitudeDMS, longitude: this.insideMapData?.longitudeDMS || this.longitudeDMS, airport_name: this.selectedAirportName, site_elevation: this.TopElevationForm.value.Site_Elevation, snapshot: screenshotPath, subscription_id: subscription_id, }; this.apiservice.createNocas(requestBody).subscribe((resultData: any) => { if (resultData.isSubscribed || resultData.freeTrialCount > 0 || resultData.isOneTimeSubscription) { this.isSubscribed = true; } else { this.isSubscribed = false; } }, (error: any) => { alert("Session Expired. Please Login again."); localStorage.removeItem('userData'); localStorage.removeItem('token'); this.router.navigate(['UsersLogin']); });
-    } else { alert("Please fill out all required fields in the form."); }
+      const lat = parseFloat(this.TopElevationForm.value.Latitude); 
+      const lng = parseFloat(this.TopElevationForm.value.Longitude); 
+      const distance = this.calculateDistance(this.lat, this.long, this.airportCoordinates[0], this.airportCoordinates[1]); 
+      const clickedFeature = this.geojsonLayer.getLayers().find((layer: any) => { 
+        return layer.getBounds().contains([lat, lng]); }); 
+        let elevation = 0; let permissibleHeight = 0; if (clickedFeature) 
+          { const properties = clickedFeature.feature.properties; elevation = parseFloat(properties.name); 
+            permissibleHeight = elevation - parseFloat(this.TopElevationForm.get('Site_Elevation').value); 
+          } 
+          const requestBody = { 
+            user_id: this.apiservice.userData.id, 
+            distance: this.insideMapData?.newDistance || (distance.toFixed(2)), 
+            permissible_elevation: this.insideMapData?.elevation + "" || elevation + "", 
+            permissible_height: this.insideMapData?.permissibleHeight || (permissibleHeight < 0 ? '-' : Math.abs(permissibleHeight).toFixed(2)), 
+            city: this.TopElevationForm.value.CITY, 
+            latitude: this.insideMapData?.latitudeDMS || this.latitudeDMS, 
+            longitude: this.insideMapData?.longitudeDMS || this.longitudeDMS, 
+            airport_name: this.selectedAirportName, site_elevation: this.TopElevationForm.value.Site_Elevation, 
+            snapshot: screenshotPath, subscription_id: subscription_id, 
+          }; 
+          this.apiservice.createNocas(requestBody).subscribe((resultData: any) => { 
+            if (resultData.isSubscribed) 
+              { 
+                this.isSubscribed = true;
+              } 
+            else { 
+              this.isSubscribed = false; 
+            } 
+          }, 
+            (error: any) => { 
+              alert("Session Expired. Please Login again."); 
+              localStorage.removeItem('userData'); 
+              localStorage.removeItem('token'); 
+              this.router.navigate(['UsersLogin']); 
+            });
+    } else { 
+      alert("Please fill out all required fields in the form.");
+
+     }
   }
  
   displayMapData(lat: number, lng: number, airportCoordinates: [number, number]) {
@@ -1163,18 +878,15 @@ feetToMeters(feet: number): number {
     const clickedFeature = this.geojsonLayer.getLayers().find((layer: any) => {
       return layer.getBounds().contains([this.lat, this.long]);
     });
- 
     if (clickedFeature) {
       const properties = clickedFeature.feature.properties;
       (properties)
       const elevation = properties.name;
       const permissibleHeight = parseFloat(properties.name) - parseFloat(this.TopElevationForm.get('Site_Elevation').value);
- 
       if (elevation === 'NOC Required') {
         alert("The selected location requires a **No Objection Certificate (NOC)** for further processing. Please contact our support team for assistance.");
         return;
       }
- 
       this.insideMapData = {
         elevation: elevation,
         permissibleHeight: permissibleHeight < 0 ? '-' : Math.abs(permissibleHeight).toFixed(2),
@@ -1192,11 +904,9 @@ feetToMeters(feet: number): number {
   updateSelectedAirport(airportCity: string, airportName: string, distance: number) {
     this.airportName = airportName;
     this.distance = distance;
-    (this.distance, "jwse")
     const airport = this.airportCoordinatesList.find(airport => airport[3] === airportName);
     const selectionMode = this.TopElevationForm.get('selectionMode')?.value;
     if (selectionMode === 'manual') {
- 
       if (airport) {
         this.TopElevationForm.patchValue({
           CITY: airportCity,
@@ -1264,36 +974,27 @@ feetToMeters(feet: number): number {
  
   showMap(lat: number, lng: number) {
     this.map = L.map('map', { zoomControl: false, attributionControl: false }).setView([20.5937, 78.9629], 5);
- 
- 
     const streets = L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
       subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
     });
- 
     const darkMatter = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {});
- 
     const satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {});
- 
     const navigation = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
       attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ',
       maxZoom: 16
     });
- 
     const googleHybrid = L.tileLayer('http://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', {
       maxZoom: 20,
       subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
     });
- 
     const googleSat = L.tileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
       maxZoom: 20,
       subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
     });
- 
     const googleTerrain = L.tileLayer('http://{s}.google.com/vt/lyrs=p&x={x}&y={y}&z={z}', {
       maxZoom: 20,
       subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
     });
- 
     const baseMaps = {
       'Streets': streets,
       'Satellite': satellite,
@@ -1303,7 +1004,6 @@ feetToMeters(feet: number): number {
       'Terrain': googleTerrain,
       'Dark': darkMatter
     };
- 
     const overlayMaps = {};
     // Create and add watermark control
     const WatermarkControl = L.Control.extend({
@@ -1316,16 +1016,12 @@ feetToMeters(feet: number): number {
         return img;
       }
     });
- 
     // Add the watermark control to the map
     new WatermarkControl({ position: 'topleft' }).addTo(this.map);
- 
- 
     L.control.layers(baseMaps, overlayMaps, { position: 'topright' }).addTo(this.map);
     streets.addTo(this.map);
     L.control.scale({ position: 'bottomright', metric: false }).addTo(this.map);
     L.control.zoom({ position: 'bottomright' }).addTo(this.map);
- 
     if (this.marker) {
       this.marker.setLatLng([lat, lng]);
     } else {
@@ -1349,7 +1045,6 @@ feetToMeters(feet: number): number {
       this.nearestAirportGeoJSONLayer = null;
     }
   }
- 
   getCityLocation(cityName: string): { lat: number, lng: number } | null {
     return null;
   }
@@ -1391,7 +1086,6 @@ feetToMeters(feet: number): number {
     this.apiservice.fetchAirports().subscribe({
       next: (res) => {
         if (res && res.airports) {
-          // Sort the airports data by airport_city in ascending order
           this.airports = res.airports.sort((a: { airport_city: string; }, b: { airport_city: any; }) => a.airport_city.localeCompare(b.airport_city));
         } else {
           console.error('No airports data received');
@@ -1406,7 +1100,6 @@ feetToMeters(feet: number): number {
  
   convertDMSsToDD(degrees: number, minutes: number, seconds: number, direction: string): number {
     let dd = degrees + (minutes / 60) + (seconds / 3600);
-    // Apply negative sign if direction is South or West
     if (direction === 'S' || direction === 'W') {
       dd = -dd;
     }
@@ -1420,30 +1113,20 @@ feetToMeters(feet: number): number {
       icon: 'success',
       confirmButtonText: 'OK'
     });
- 
- 
- 
-    // Automatically set the service2 checkbox to true
     this.requestForm.patchValue({
       service2: true
     });
- 
-    // Now, submit the form
     this.createRequest();
   }
- 
- 
+  
   createRequest() {
     if (this.requestForm.valid) {
       const requestData = {
         services: JSON.stringify(this.requestForm.value),
         user_id: this.apiservice.userData.id
       };
- 
       this.apiservice.createRequest(requestData).subscribe(
         (result: any) => {
-          // this.toastr.success("Request created successfully");
-          // Optionally, navigate to another page or perform additional actions here
         },
         (error) => {
           console.error("Error creating request:", error);
@@ -1454,6 +1137,5 @@ feetToMeters(feet: number): number {
       this.toastr.warning('Please select a service.');
     }
   }
- 
- 
 }
+ 

@@ -6,7 +6,7 @@ import { MatTableDataSource } from '@angular/material/table';
 import { ApiService } from '../Shared/Api/api.service';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
-import { v4 as uuidv4 } from 'uuid';  // Correct import statement
+import { v4 as uuidv4 } from 'uuid';
 
 @Component({
   selector: 'app-transaction-details',
@@ -22,6 +22,8 @@ export class TransactionDetailsComponent implements OnInit {
     'razorpay_payment_id',
     'createdAt',
     'subscription_status',
+    'allowed_requests',
+    'remaining_requests',
     'expiry_date',
     'subscription_type',
     'price',
@@ -53,13 +55,16 @@ export class TransactionDetailsComponent implements OnInit {
       response => {
         this.subscriptionDetails = response.map(subscription => ({
           ...subscription,
-          razorpay_payment_id: subscription.razorpay_payment_id.trim(),
-          createdAt: subscription.createdAt.trim(),
-          subscription_status: subscription.subscription_status.trim(),
-          expiry_date: subscription.expiry_date.trim(),
-          subscription_type: subscription.subscription_type.trim(),
-          price: subscription.price.trim()
+          razorpay_payment_id: subscription.razorpay_payment_id,
+          createdAt: subscription.createdAt,
+          subscription_status: subscription.subscription_status,
+          expiry_date: subscription.expiry_date,
+          subscription_type: subscription.subscription_type,
+          price: subscription.price,
+          allowed_requests: subscription.allowed_requests,
+          remaining_requests: subscription.remaining_requests
         }));
+        console.log(this.subscriptionDetails,"wergth")
         this.dataSource = new MatTableDataSource(this.subscriptionDetails);
         this.dataSource.paginator = this.paginator;
         setTimeout(() => {
@@ -74,7 +79,7 @@ export class TransactionDetailsComponent implements OnInit {
 
   applyFilter(event: Event) {
     const filterValue = (event.target as HTMLInputElement).value;
-    this.dataSource.filter = filterValue.trim().toLowerCase();
+    this.dataSource.filter = filterValue.toLowerCase();
 
     if (this.dataSource.paginator) {
       this.dataSource.paginator.firstPage();
@@ -90,38 +95,43 @@ export class TransactionDetailsComponent implements OnInit {
   downloadReceipt(subscription: any) {
     this.selectedSubscription = subscription;
     this.showReceiptDetails = true;
+  
+    // Assuming the price stored is already the total price (including GST), we can calculate the breakdown.
+    const gstRate = 0.18;
+    const totalAmount = parseFloat(subscription.price); // Total amount including GST
+    const baseAmount = totalAmount / (1 + gstRate); // Calculate base amount excluding GST
+    const gstAmount = totalAmount - baseAmount; // Calculate GST amount
+  
     const doc = new jsPDF();
-
     const logo = new Image();
     logo.src = 'assets/cropped-C_Name.png';
-
+  
     logo.onload = () => {
       doc.addImage(logo, 'PNG', 10, 10, 40, 10);
       doc.setFontSize(18);
       doc.text('Invoice', 95, 40);
-
+  
       const invoiceDate = new Date().toLocaleDateString();
-      // Generate a meaningful invoice number
       const today = new Date();
-      const datePart = today.toISOString().slice(0, 10).replace(/-/g, ''); // YYYYMMDD
-      const uniqueId = uuidv4().split('-')[0]; // Shortened UUID segment
-      const invoiceNumber = `CASPER-${datePart}-${uniqueId}`;  // Example: CASPER-20240821-1b4e
-
+      const datePart = today.toISOString().slice(0, 10).replace(/-/g, '');
+      const uniqueId = uuidv4().split('-')[0];
+      const invoiceNumber = `CASPER-${datePart}-${uniqueId}`;
+      const gstinnumber = `qwdefrgtyujiouyhtgrfed`;
       doc.setFontSize(12);
       doc.text(`Invoice Date: ${invoiceDate}                                         Invoice No: ${invoiceNumber}`, 10, 60);
-
+      doc.text(`                                                                               GSTIN No: ${gstinnumber}`, 10, 70);
       doc.text(`To:`, 10, 80);
       doc.text(this.apiService.userData.uname, 10, 90);
       doc.text(this.apiService.userData.email, 10, 100);
-
+  
       doc.setFontSize(10);
       let yPosition = 120;
       const labelX = 10;
       const valueX = 140;
-
+  
+      // Subscription details
       doc.text('Subscription Details', labelX, yPosition);
       yPosition += 10;
-
       doc.text('Subscription ID', labelX, yPosition);
       doc.text(subscription.subscription_id, valueX, yPosition);
       yPosition += 10;
@@ -136,30 +146,41 @@ export class TransactionDetailsComponent implements OnInit {
       yPosition += 10;
       doc.text('Payment ID', labelX, yPosition);
       doc.text(subscription.razorpay_payment_id, valueX, yPosition);
-
-      yPosition += 10;
+  
+      // Amount details (Subtotal, GST, Total)
+      yPosition += 20;
       doc.text('----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------', 10, yPosition);
-
       yPosition += 7;
-
-      doc.text('Total:', 150, yPosition);
-      doc.text(subscription.price.toString(), 180, yPosition);
-
+  
+      doc.text('Subtotal (Excluding GST):', labelX, yPosition);
+      doc.text(baseAmount.toFixed(2), valueX, yPosition); // Base amount excluding GST
       yPosition += 10;
-      doc.text('Total Amount:', 150, yPosition);
-      doc.text(subscription.price.toString(), 180, yPosition);
+  
+      doc.text('GST (18%):', labelX, yPosition);
+      doc.text(gstAmount.toFixed(2), valueX, yPosition); // GST amount
+      yPosition += 10;
+  
+      doc.text('Total Amount (Including GST):', labelX, yPosition);
+      doc.text(totalAmount.toFixed(2), valueX, yPosition); // Total amount including GST
+      yPosition += 10;
+  
+      doc.text('----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------', 10, yPosition);
+  
+      yPosition += 20;
       doc.text('Please retain for your records.', 10, doc.internal.pageSize.getHeight() - 55);
       doc.text('Company Name: Cognitive Navigation Pvt Ltd.', 10, doc.internal.pageSize.getHeight() - 50);
       doc.text('Company Address:', 10, doc.internal.pageSize.getHeight() - 45);
-
+  
       let yOffset = doc.internal.pageSize.getHeight() - 40;
       this.addressLines.forEach(line => {
         doc.text(line, 10, yOffset);
         yOffset += 5;
       });
+  
       doc.text('Note: For Any Query Contact on email : connect@cognitivenavigation.com And phone number :  +91 98202 09864 ', 10, doc.internal.pageSize.getHeight() - 15);
-
-      doc.save(`${invoiceNumber} 10, 60).pdf`);
+  
+      doc.save(`${invoiceNumber}.pdf`);
     };
-}
+  }
+  
 }

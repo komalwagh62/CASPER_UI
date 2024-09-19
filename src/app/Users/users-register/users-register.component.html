@@ -64,9 +64,9 @@
                     <div class="input-container ">
                         <input type="tel" autocomplete  placeholder="OTP" formControlName="otp" (keypress)="onOtpKeyPress($event)"
                             autocomplete="one-time-code" id="otp" required maxlength="4" pattern="[0-9]*">
-                        <button type="button" class="btn suffix" (click)="regenerateOtp()">
-                            <i class="bi bi-arrow-repeat suffix"></i>
-                        </button>
+                       
+                            <i class="btn bi bi-arrow-repeat suffix" (click)="regenerateOtp()"></i>
+                      
                     </div>
                     <div *ngIf="SignupForm.get('otp').invalid && (SignupForm.get('otp').dirty || SignupForm.get('otp').touched)"
                         class="alert alert-danger mt-2">

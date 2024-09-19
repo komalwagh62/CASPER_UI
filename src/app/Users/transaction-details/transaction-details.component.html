@@ -21,6 +21,15 @@
               {{ subscription.subscription_status }}
             </td>
           </ng-container>
+          <ng-container matColumnDef="allowed_requests">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header> Allowed Requests </th>
+            <td mat-cell *matCellDef="let subscription"> {{ subscription.allowed_requests }} </td>
+          </ng-container>
+          <ng-container matColumnDef="remaining_requests">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header> Remaining Requests </th>
+            <td mat-cell *matCellDef="let subscription"> {{ subscription.remaining_requests }} </td>
+          </ng-container>
+
           <ng-container matColumnDef="expiry_date">
             <th mat-header-cell *matHeaderCellDef mat-sort-header> Expiry Date </th>
             <td mat-cell *matCellDef="let subscription"> {{ subscription.expiry_date | date }} </td>

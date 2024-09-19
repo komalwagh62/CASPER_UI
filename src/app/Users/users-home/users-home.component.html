@@ -165,7 +165,14 @@
           {{element.subscription_status}}
         </mat-cell>
       </ng-container>
- 
+      <ng-container matColumnDef="allowed_requests">
+        <mat-header-cell *matHeaderCellDef mat-sort-header> Allowed Requests </mat-header-cell>
+        <mat-cell *matCellDef="let element"> {{element.allowed_requests}} </mat-cell>
+      </ng-container>
+      <ng-container matColumnDef="remaining_requests">
+        <mat-header-cell *matHeaderCellDef mat-sort-header> Remaining Requests </mat-header-cell>
+        <mat-cell *matCellDef="let element"> {{element.remaining_requests}} </mat-cell>
+      </ng-container>
       <ng-container matColumnDef="createdAt">
         <mat-header-cell *matHeaderCellDef mat-sort-header> Active Date </mat-header-cell>
         <mat-cell *matCellDef="let element"> {{element.createdAt}} </mat-cell>
@@ -187,9 +194,9 @@
       </ng-container>
  
       <mat-header-row
-        *matHeaderRowDef="['subscription_id', 'subscription_status','createdAt','expiry_date','price', 'subscription_type']"></mat-header-row>
+        *matHeaderRowDef="['subscription_id', 'subscription_status','allowed_requests','remaining_requests','createdAt','expiry_date','price', 'subscription_type']"></mat-header-row>
       <mat-row
-        *matRowDef="let row; columns: ['subscription_id', 'subscription_status','createdAt','expiry_date','price', 'subscription_type'];"></mat-row>
+        *matRowDef="let row; columns: ['subscription_id', 'subscription_status','allowed_requests','remaining_requests','createdAt','expiry_date','price', 'subscription_type'];"></mat-row>
     </mat-table>
     <mat-paginator #subscriptionPaginator [pageSizeOptions]="[5, 10, 25, 100]" showFirstLastButtons></mat-paginator>
   </div>

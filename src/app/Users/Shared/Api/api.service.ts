@@ -14,10 +14,11 @@ export class ApiService {
   [x: string]: any;
   isAuthenticated: boolean = false;
   // public baseUrl: string = 'http://ec2-13-58-174-214.us-east-2.compute.amazonaws.com:8082/api';
-  public baseUrl: string = 'http://Cognitive-Casper-Dev-ALB-1938233015.ap-south-1.elb.amazonaws.com:80/api';
-  // public baseUrl: string = 'http://10.98.10.25:8082/api'
-  ;
+  // public baseUrl: string = 'http://Cognitive-Casper-Dev-ALB-1938233015.ap-south-1.elb.amazonaws.com:80/api';
+  // public baseUrl: string = 'http://10.98.10.25:8082/api';
   // public baseUrl: string = 'http://localhost:3001/api';
+  public baseUrl: string = 'http://cognitive-prod-LB-76608278.ap-south-1.elb.amazonaws.com:80/api';
+
   public loginUserId: string = '';
   public userData!: User;
   public token: string = '';

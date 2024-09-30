@@ -1,1 +1,10 @@
-<app-users-side-nav></app-users-side-nav>
+<ng-container *ngIf="isAdminDashboard; else userNav">
+    <app-side-nav></app-side-nav>  <!-- Admin Side Navigation -->
+  </ng-container>
+  
+  <ng-template #userNav>
+    <app-users-side-nav></app-users-side-nav>  <!-- User Side Navigation -->
+  </ng-template>
+  
+  <router-outlet></router-outlet>  <!-- Main Content Area -->
+  

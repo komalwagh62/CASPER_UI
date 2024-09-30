@@ -84,34 +84,19 @@ export class UsersRegisterComponent implements OnInit {
 
     // Construct the API URL
     const smsApiUrl = `https://bhashsms.com/api/sendmsg.php?user=${user}&pass=${pass}&sender=${sender}&phone=${phone}&text=${encodedText}&priority=${priority}&stype=${stype}`;
-    console.log(`Sending OTP ${this.generatedOTP} to mobile number: ${phone}`);
-    
+
     this.http.get(smsApiUrl, { responseType: 'text' }).subscribe(
       (response: any) => {
         // Log the API response
-       
+        if (response.includes("SOME_ERROR_MESSAGE") || response.includes("error")) { // Check for any error message in the response
+          // this.toastr.error("Failed to send OTP: " + response, 'Error');
+        } else {
           this.toastr.success('OTP sent successfully', 'Success');
-    
-          // Log the generated OTP for debugging
-          console.log(`Generated OTP: ${this.generatedOTP}`);
-    
-          // Assuming you have a form control for OTP
-          const enteredOtp = this.SignupForm.get('otp').value;
-    
-          // Check if the entered OTP matches the generated OTP
-          if (enteredOtp === this.generatedOTP) {
-            console.log('OTP verification successful');
-            // Proceed with the next steps
-          } else {
-            console.log('OTP does not match');
-            // Handle the mismatch, e.g., show an error message
-            this.toastr.error('Invalid OTP entered. Please try again.', 'Error');
-          }
         }
+      },
       
-    
     );
-    
+   
 }
 
 
@@ -167,57 +152,44 @@ export class UsersRegisterComponent implements OnInit {
 
 
   createUser() {
-    // First, check if the form is valid
-    if (this.SignupForm.invalid) {
-      return;
-    }
-  
-    // Extract the phone number and entered OTP
-    const phoneNumber = this.SignupForm.get('phone_number').value;
-    const enteredOtp = this.SignupForm.get('otp').value;
-  
-    // Check if the entered OTP matches the generated OTP
-    if (enteredOtp !== this.generatedOTP) {
-      this.toastr.error('Invalid OTP entered. Please try again.', 'Error');
-      return; // Prevent registration
-    }
-  
-    // Check if the phone number already exists
-    this.apiService.checkPhoneNumberExists(phoneNumber).subscribe(
-      (exists: boolean) => {
-        console.log("Phone number exists:", exists);
-        if (exists) {
-          this.toastr.error('This mobile number is already registered.', 'Error');
-        } else {
-          // Proceed with user registration if phone number does not exist
-          const userData = this.SignupForm.value;
-  
-          // Call your API to register the user
-          this.apiService.createUser(userData).subscribe(
-            (response: any) => {
-              // Handle successful registration response
-              console.log('User registered successfully', response);
-              this.toastr.success('Registration successful!', 'Success');
-              this.router.navigate(['UsersLogin']);
-              // Navigate to login or another page if needed
-            },
-            (error: any) => {
-              // Handle registration error
-              console.error('Registration failed', error);
-              this.toastr.error('Registration failed. Please try again.', 'Error');
-            }
-          );
+    if (this.SignupForm.valid) {
+      const phoneNumber = this.SignupForm.value.phone_number;
+ 
+      this.apiService.checkPhoneNumberExists(phoneNumber).subscribe(
+        (exists: boolean) => {
+          console.log("Phone number exists:", exists);
+          if (exists) {
+            this.toastr.error('This mobile number is already registered.', 'Error');
+          } else {
+            this.apiService.createUser({
+              uname: this.SignupForm.value.uname,
+              phone_number: phoneNumber,
+              address: this.SignupForm.value.address,
+              email: this.SignupForm.value.email,
+              password: this.SignupForm.value.password
+            }).subscribe(
+              (resultData: any) => {
+                console.log("User registration response:", resultData);
+                this.toastr.success('User registered successfully', 'Success');
+                this.router.navigate(['UsersLogin']);
+              },
+              (error: any) => {
+                console.error("Error registering user:", error);
+                this.toastr.error(error.error.message, 'Error');
+              }
+            );
+          }
+        },
+        (error: any) => {
+          console.error("Error checking phone number:", error);
+          this.toastr.error('There was an error verifying the phone number. Please try again.', 'Error');
         }
-      },
-      (error: any) => {
-        // Handle error in checking phone number existence
-        console.error('Error checking phone number', error);
-        this.toastr.error('Error checking phone number. Please try again.', 'Error');
-      }
-    );
+      );
+    } else {
+      this.toastr.error('Please fill in all required fields and ensure they are valid.', 'Error');
+    }
   }
-  
-  
+
 
 
 }

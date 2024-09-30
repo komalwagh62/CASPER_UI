@@ -1,4 +1,104 @@
 /* Background Image for Profile Section */
+.example-spacer {
+  flex: 1 1 auto;
+}
+ 
+.text {
+  text-align: center;
+}
+ 
+a:link {
+  text-decoration: none;
+  color: #33598a;
+}
+ 
+.img {
+  vertical-align: middle;
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  padding: 18px;
+}
+ 
+.example-sidenav-content {
+  height: 100%;
+  background-color: white;
+}
+ 
+mat-menu {
+  width: 100%;
+}
+ 
+@import url('https://fonts.googleapis.com/css?family=Titillium+Web:400,600');
+ 
+.header {
+  font-family: 'Titillium Web';
+  font-weight: 600;
+}
+ 
+.header * {
+  box-sizing: border-box;
+  transition: all .35s ease;
+}
+ 
+.header button::before,
+.header button::after {
+  content: '';
+  height: 14px;
+  width: 14px;
+  position: absolute;
+  transition: all .35s ease;
+  opacity: 0;
+}
+ 
+.header button::before {
+  content: '';
+  right: 0;
+  top: 0;
+  border-top: 3px solid #0044ff;
+  border-right: 3px solid #0051ff;
+  transform: translate(-100%, 50%);
+}
+ 
+.header button:after {
+  content: '';
+  left: 0;
+  bottom: 0;
+  border-bottom: 3px solid #0051ff;
+  border-left: 3px solid #0051ff;
+  transform: translate(100%, -50%)
+}
+ 
+.header button:hover:before,
+.header button:hover:after {
+  transform: translate(0, 0);
+  opacity: 1;
+}
+ 
+@media (max-width: 768px) {
+ .username-button {
+      font-size: 14px;
+  }
+}
+ 
+@media (max-width: 576px) {
+  .username-button {
+       font-size: 12px;
+   }
+ }
+ 
+ 
+@media (max-width: 430px) {
+  .username-button {
+      font-size:9px;
+  }
+}
+ 
+@media (max-width: 344px) {
+  .username-button {
+      font-size:7px;
+  }
+}
 .section.profile::before {
   content: '';
   position: absolute;

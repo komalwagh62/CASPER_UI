@@ -1,6 +1,7 @@
 import { Component, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { ApiService } from '../Shared/Api/api.service';
+import { MatSidenav } from '@angular/material/sidenav'; // Import MatSidenav
 
 @Component({
   selector: 'app-users-side-nav',
@@ -10,6 +11,7 @@ import { ApiService } from '../Shared/Api/api.service';
 export class UsersSideNavComponent {
   isloggedIn: boolean = false
   currentRoute!: string;
+  @ViewChild('drawer') drawer!: MatSidenav;
   constructor(private router: Router, public apiService: ApiService) {
     this.isloggedIn = !!this.apiService.token
 

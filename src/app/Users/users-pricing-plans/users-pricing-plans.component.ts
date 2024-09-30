@@ -121,7 +121,7 @@ export class UsersPricingPlansComponent implements OnInit {
       return;
     }
     this.toastr.success("Your free trial has been successfully activated.");
-    this.router.navigate(['C_NOCAS-MAP']);
+    this.router.navigate(['CASPER']);
   }
   
 }

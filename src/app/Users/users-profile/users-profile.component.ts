@@ -84,7 +84,7 @@ export class UsersProfileComponent implements OnInit {
     return namePattern.test(this.updatedUser.uname);
   }
   logout() {
-    this.router.navigate(['UserLogin']);
+    this.router.navigate(['UsersLogin']);
   }
  
   navigateToProfile() {

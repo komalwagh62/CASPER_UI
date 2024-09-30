@@ -10,6 +10,7 @@ import { ForgotPasswordComponent } from './Users/forgot-password/forgot-password
 import { UsersrequestServiceComponent } from './Users/usersrequest-service/usersrequest-service.component';
 import { TransactionDetailsComponent } from './Users/transaction-details/transaction-details.component';
 import { FooterComponent } from './Users/Shared/footer/footer.component';
+import { AdminDashboardComponent } from './Admin/admin-dashboard/admin-dashboard.component';
 import { FormsModule } from '@angular/forms';
 import { AuthGuard } from './Users/Shared/Api/auth.guard'; // Import the AuthGuard service
 
@@ -20,11 +21,12 @@ const routes: Routes = [
   { path: 'UsersLogin', component: UsersLoginComponent },
   { path: 'UsersProfile', component: UsersProfileComponent, canActivate: [AuthGuard] },
   { path: 'PricingPlans', component: UsersPricingPlansComponent, canActivate: [AuthGuard] },
-  { path: 'C_NOCAS-MAP', component: UsersNOCASComponent, canActivate: [AuthGuard] },
+  { path: 'CASPER', component: UsersNOCASComponent, canActivate: [AuthGuard] },
   { path: 'forgot-pass', component: ForgotPasswordComponent },
   { path: 'request-Service', component: UsersrequestServiceComponent, canActivate: [AuthGuard] },
   { path: 'TransactionDetails', component: TransactionDetailsComponent, canActivate: [AuthGuard] },
   { path: 'FooterComponent', component: FooterComponent },
+  { path:'AdminDashboard', component: AdminDashboardComponent , canActivate: [AuthGuard]}
 ];
 
 @NgModule({

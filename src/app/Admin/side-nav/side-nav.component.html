@@ -1,0 +1,32 @@
+<section>
+    <div class="container-fluid">
+        <nav class="navbar navbar-expand-lg">
+            <button *ngIf="isloggedIn" type="button" aria-label="Toggle sidenav" mat-icon-button
+                (click)="drawer.toggle()" color="primary">
+                <mat-icon aria-label="Side nav toggle icon">menu</mat-icon>
+            </button>
+            <img src="assets/icon/CASPER_LOGO.png" alt="NOC from airport authority" width="130" height="65">
+            <span class="example-spacer"></span>
+            
+            <div class="example-button-row">
+                <button type="button" mat-stroked-button class="bg-body-tertiary text-end" style="color: red;"
+                (click)="logout()">Log-Out</button>
+        
+            </div>
+        </nav>
+    </div>
+</section>
+
+
+<section>
+    <mat-sidenav-container class="example-container">
+       
+        <mat-sidenav-content class="example-sidenav-content" (click)="drawer.close()">
+            <router-outlet></router-outlet>
+        </mat-sidenav-content>
+
+    </mat-sidenav-container>
+   
+</section>
+ 
+<app-footer></app-footer>

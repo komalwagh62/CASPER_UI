@@ -29,8 +29,7 @@
                         <input type="password" placeholder="Password" autocomplete  [type]="showPassword ? 'text' : 'password'"
                             id="password" autocomplete="password" formControlName="password"
                             placeholder="8+ (a, A, 1, #)">
-                        <i class="bi" [ngClass]="{'bi-eye-slash-fill': !showPassword, 'bi-eye-fill': showPassword}"
-                            (click)="togglePasswordVisibility()"></i>
+                        
                     </div>
                     <div *ngIf="LogInForm.get('password').invalid && (LogInForm.get('password').dirty || LogInForm.get('password').touched)"
                         class="alert alert-danger mt-2">

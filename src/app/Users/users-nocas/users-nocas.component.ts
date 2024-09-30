@@ -719,7 +719,7 @@ export class UsersNOCASComponent implements OnInit {
         if (confirmation) {
           this.isSubscribed = true;
         }
-        this.router.navigate(['C_NOCAS-MAP']);
+        this.router.navigate(['CASPER']);
         
         const airportCITY = this.TopElevationForm.get('CITY')?.value;
         const latitude = parseFloat(this.TopElevationForm.get('Latitude')?.value);

@@ -11,8 +11,7 @@ import { FormBuilder, FormGroup } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import Swal from 'sweetalert2';
  
- 
- 
+
 type ServiceNames = Record<string, string>;
  
 @Component({
@@ -96,9 +95,7 @@ export class UsersHomeComponent implements OnInit {
  
   }
  
- 
- 
- 
+
   bufferToBase64(buffer: any) {
     return btoa(new Uint8Array(buffer).reduce((data, byte) => data + String.fromCharCode(byte), ''));
   }

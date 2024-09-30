@@ -13,11 +13,13 @@ import { map, Observable } from 'rxjs';
 export class ApiService {
   [x: string]: any;
   isAuthenticated: boolean = false;
+  isAdmin: boolean = false; // Add this flag to track admin status
+
   // public baseUrl: string = 'http://ec2-13-58-174-214.us-east-2.compute.amazonaws.com:8082/api';
   // public baseUrl: string = 'http://Cognitive-Casper-Dev-ALB-1938233015.ap-south-1.elb.amazonaws.com:80/api';
   // public baseUrl: string = 'http://10.98.10.25:8082/api';
-  // public baseUrl: string = 'http://localhost:3001/api';
-  public baseUrl: string = 'http://cognitive-prod-LB-76608278.ap-south-1.elb.amazonaws.com:80/api';
+  public baseUrl: string = 'http://localhost:3001/api';
+  // public baseUrl: string = 'https//';
 
   public loginUserId: string = '';
   public userData!: User;
@@ -34,6 +36,9 @@ export class ApiService {
   sendOtp(email: string): Observable<any> {
     return this.http.post<any>(`${this.baseUrl}/otp/sendOtp`, { email });
   }
+
+
+ 
 
   validateOtp(email: string, otp: string): Observable<any> {
     return this.http.post<any>(`${this.baseUrl}/otp/validateOtp`, { email, otp });
@@ -173,6 +178,7 @@ export class ApiService {
     this.isAuthenticated = false;
     localStorage.removeItem('token');
     localStorage.removeItem('userData');
+
 
   }
 }

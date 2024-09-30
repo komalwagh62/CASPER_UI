@@ -23,7 +23,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { HttpClientModule, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { FooterComponent } from './Users/Shared/footer/footer.component';
 import { UsersHomeComponent } from './Users/users-home/users-home.component';
 import { UsersPricingPlansComponent } from './Users/users-pricing-plans/users-pricing-plans.component';
@@ -40,7 +40,9 @@ import { MatTableModule } from '@angular/material/table';
 import { MatPaginator,MatPaginatorModule } from '@angular/material/paginator';
 import {MatSortModule} from '@angular/material/sort';
 import { ToastrModule } from 'ngx-toastr';
-
+import { AdminDashboardComponent } from './Admin/admin-dashboard/admin-dashboard.component';
+import { DatePipe } from '@angular/common';
+import { SideNavComponent } from './Admin/side-nav/side-nav.component';
 
 @NgModule({ declarations: [
         AppComponent,
@@ -54,7 +56,10 @@ import { ToastrModule } from 'ngx-toastr';
         ForgotPasswordComponent,
         UsersrequestServiceComponent,
         TransactionDetailsComponent,
-        UsersSideNavComponent  
+        UsersSideNavComponent,
+        AdminDashboardComponent,
+        SideNavComponent
+        
     ],
     bootstrap: [AppComponent], 
     imports: [BrowserModule,
@@ -88,6 +93,8 @@ import { ToastrModule } from 'ngx-toastr';
         MatPaginatorModule,
         MatSortModule,
         MatTableModule,
+        MatPaginatorModule,
+    
         
         ToastrModule.forRoot({
             // timeOut: 60000, // 60 seconds
@@ -99,6 +106,7 @@ import { ToastrModule } from 'ngx-toastr';
          providers: [
         provideAnimationsAsync(),
         provideHttpClient(withInterceptorsFromDi()),
+        DatePipe
     ] })
 export class AppModule { }
 
